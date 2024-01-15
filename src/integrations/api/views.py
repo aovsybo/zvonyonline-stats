@@ -1,4 +1,5 @@
-from django.conf import settings
+from  datetime import datetime, timedelta
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,16 +14,24 @@ from integrations.service.google_sheets import (
 )
 
 
+def get_current_time():
+    current_local_time = datetime.utcnow() + timedelta(hours=4)
+    return current_local_time.strftime("%H:%M")
+
+
 class PostDataToTable(APIView):
     def get(self, request):
         data = dict()
-        sheet_id = "1607843362"
-        new_name = "new name"
-        # data["table"] = update_sheet_name(
-        #     sheet_id,
-        #     new_name
-        # )
-        data["table"] = create_main_sheet_copy("boba")
+        projects = [
+            {
+                "name": "ЮСИ. Лидген с Авито РнД",
+                "contacts": 1200,
+                "dialogs": 800,
+                "lead": 80,
+            }
+        ]
+        working_sheet_id = create_main_sheet_copy(get_current_time())
+
         return Response(data=data, status=status.HTTP_200_OK)
 
 

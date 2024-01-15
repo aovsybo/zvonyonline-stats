@@ -99,6 +99,7 @@ def create_main_sheet_copy(sheet_name: str):
         settings.GS_MAIN_SHEET_ID,
     )
     update_sheet_name(response["sheetId"], sheet_name)
+    return response["sheetId"]
 
 
 

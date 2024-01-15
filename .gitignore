@@ -1,3 +1,5 @@
 .env
 .idea/
 .venv/
+credentials.json
+token.json
