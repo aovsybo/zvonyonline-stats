@@ -1,9 +1,9 @@
 from django.urls import path
 
-from .views import PostDataToTable, CallsAPIView
+from .views import WriteDataToGoogleSheet, CreateCallsAPIView
 
 
 urlpatterns = [
-    path('', PostDataToTable.as_view()),
-    path('calls', CallsAPIView.as_view()),
+    path('write-call-to-google-sheet', WriteDataToGoogleSheet.as_view()),
+    path('create-call', CreateCallsAPIView.as_view()),
 ]

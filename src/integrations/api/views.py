@@ -1,6 +1,6 @@
 from  datetime import datetime, timedelta
 
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -22,23 +22,18 @@ def get_current_time():
     return current_local_time.strftime("%H:%M")
 
 
-class CallsAPIView(ListCreateAPIView):
+class CreateCallsAPIView(CreateAPIView):
+    serializer_class = CallInfoSerializer
+
+
+class WriteDataToGoogleSheet(ListAPIView):
     serializer_class = CallInfoSerializer
     queryset = CallInfo.objects.all()
 
-
-class PostDataToTable(APIView):
     def get(self, request):
         data = dict()
-        projects = [
-            {
-                "name": "ЮСИ. Лидген с Авито РнД",
-                "contacts": 1200,
-                "dialogs": 800,
-                "lead": 80,
-            }
-        ]
+        data["objects"] = self.serializer_class(self.get_queryset(), many=True).data
         working_sheet_id = create_main_sheet_copy(get_current_time())
+        data["worksheet"] = working_sheet_id
         return Response(data=data, status=status.HTTP_200_OK)
-
 
