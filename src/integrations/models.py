@@ -1,3 +1,8 @@
 from django.db import models
 
-# Create your models here.
+
+class CallInfo(models.Model):
+    project_name = models.CharField(max_length=255)
+    contacts = models.IntegerField(default=0)
+    dialogs = models.IntegerField(default=0)
+    leads = models.IntegerField(default=0)

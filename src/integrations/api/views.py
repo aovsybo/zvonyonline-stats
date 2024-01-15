@@ -1,9 +1,12 @@
 from  datetime import datetime, timedelta
 
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from .serializers import CallInfoSerializer
+from integrations.models import CallInfo
 from integrations.service.skorozvon import get_calls
 from integrations.service.google_sheets import (
     get_table_data,
@@ -19,6 +22,11 @@ def get_current_time():
     return current_local_time.strftime("%H:%M")
 
 
+class CallsAPIView(ListCreateAPIView):
+    serializer_class = CallInfoSerializer
+    queryset = CallInfo.objects.all()
+
+
 class PostDataToTable(APIView):
     def get(self, request):
         data = dict()
@@ -31,7 +39,6 @@ class PostDataToTable(APIView):
             }
         ]
         working_sheet_id = create_main_sheet_copy(get_current_time())
-
         return Response(data=data, status=status.HTTP_200_OK)
 
 
