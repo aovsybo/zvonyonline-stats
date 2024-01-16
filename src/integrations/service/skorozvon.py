@@ -21,20 +21,42 @@ def get_call(call_id: int):
     headers = {
         "Authorization": token
     }
-    url = f"https://app.skorozvon.ru/api/v2/calls/{call_id}.mp3"
+    url = f"https://app.skorozvon.ru/api/v2/calls/{call_id}"
     response = requests.get(url, headers=headers)
-    return response.content
+    return response.json()
 
 
-def get_calls(page_num: int = 1, page_size: int = 10):
+def get_scenarios():
     token = get_token()
     headers = {
         "Authorization": token
     }
-    print(headers)
+    url = f"https://app.skorozvon.ru/api/v2/scenarios"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+
+def get_scenario(scenario_id: str):
+    token = get_token()
+    headers = {
+        "Authorization": token
+    }
+    url = f"https://app.skorozvon.ru/api/v2/scenarios/{scenario_id}"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+
+def get_calls():
+    token = get_token()
+    headers = {
+        "Authorization": token
+    }
     params = {
-        "page": page_num,
-        "length": page_size,
+        "page": 1,
+        "length": 100,
+        "sort_by_time": True,
+        "start_time": 1705185193,
+        "sort_direction": "DESC"
     }
     url = f"https://app.skorozvon.ru/api/v2/calls/"
     response = requests.get(url, headers=headers, params=params)

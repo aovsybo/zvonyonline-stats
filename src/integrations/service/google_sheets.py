@@ -67,10 +67,18 @@ def write_to_cell_google_sheet(data: str, table_link: str, table_sheet_name: str
     body = {
         "values": [[data]]
     }
-    result = service.spreadsheets().values().append(
+    result = service.spreadsheets().values().update(
         spreadsheetId=table_link, range=f"{table_sheet_name}!{cell_id}",
         valueInputOption="USER_ENTERED", body=body).execute()
     return result
+
+
+def write_project_stat_to_google_sheet(sheet_name: str, db_projects_info: list, project_indexes: dict):
+    for project_info in db_projects_info:
+        cell_num = project_indexes[project_info["project_name"]]
+        write_to_cell_google_sheet(project_info['contacts'], settings.GS_TABLE_ID, sheet_name, f"C{cell_num}")
+        write_to_cell_google_sheet(project_info['dialogs'], settings.GS_TABLE_ID, sheet_name, f"F{cell_num}")
+        write_to_cell_google_sheet(project_info['leads'], settings.GS_TABLE_ID, sheet_name, f"J{cell_num}")
 
 
 def create_sheet_copy(copy_table_id: str, copy_sheet_id: int):
@@ -108,8 +116,7 @@ def create_main_sheet_copy(sheet_name: str):
         settings.GS_TABLE_ID,
         settings.GS_MAIN_SHEET_ID,
     )
-    response2 = update_sheet_name(response["sheetId"], sheet_name)
-    print(response2)
+    update_sheet_name(response["sheetId"], sheet_name)
     return response["sheetId"]
 
 
