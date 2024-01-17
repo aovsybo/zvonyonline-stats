@@ -16,41 +16,27 @@ def get_token():
     return f"Bearer {token['access_token']}"
 
 
-def get_call(call_id: int):
-    token = get_token()
+def get_request(sub_url: str, params: dict = None):
     headers = {
-        "Authorization": token
+        "Authorization": get_token()
     }
-    url = f"https://app.skorozvon.ru/api/v2/calls/{call_id}"
-    response = requests.get(url, headers=headers)
+    response = requests.get(url=f"https://app.skorozvon.ru/api/v2/{sub_url}", headers=headers, params=params)
     return response.json()
+
+
+def get_call(call_id: int):
+    return get_request(f"calls/{call_id}")
 
 
 def get_scenarios():
-    token = get_token()
-    headers = {
-        "Authorization": token
-    }
-    url = f"https://app.skorozvon.ru/api/v2/scenarios"
-    response = requests.get(url, headers=headers)
-    return response.json()
+    return get_request("scenarios")
 
 
 def get_scenario(scenario_id: str):
-    token = get_token()
-    headers = {
-        "Authorization": token
-    }
-    url = f"https://app.skorozvon.ru/api/v2/scenarios/{scenario_id}"
-    response = requests.get(url, headers=headers)
-    return response.json()
+    return get_request(f"scenarios/{scenario_id}")
 
 
 def get_calls():
-    token = get_token()
-    headers = {
-        "Authorization": token
-    }
     params = {
         "page": 1,
         "length": 100,
@@ -58,6 +44,4 @@ def get_calls():
         "start_time": 1705185193,
         "sort_direction": "DESC"
     }
-    url = f"https://app.skorozvon.ru/api/v2/calls/"
-    response = requests.get(url, headers=headers, params=params)
-    return response.json()
+    return get_request("calls", params)
