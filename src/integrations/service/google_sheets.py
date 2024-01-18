@@ -59,6 +59,20 @@ def get_project_indexes():
     return project_indexes
 
 
+def write_to_google_sheet(data: str, table_link: str, table_sheet_name: str, sheet_range: str):
+    """
+    Отправляем данные в гугл таблицу по указанному айди таблицы и названию листа
+    """
+    service = get_service()
+    body = {
+        "values": data
+    }
+    result = service.spreadsheets().values().update(
+        spreadsheetId=table_link, range=f"{table_sheet_name}!{sheet_range}",
+        valueInputOption="USER_ENTERED", body=body).execute()
+    return result
+
+
 def write_to_cell_google_sheet(data: str, table_link: str, table_sheet_name: str, cell_id: str):
     """
     Отправляем данные в гугл таблицу по указанному айди таблицы и названию листа
@@ -73,12 +87,51 @@ def write_to_cell_google_sheet(data: str, table_link: str, table_sheet_name: str
     return result
 
 
-def write_project_stat_to_google_sheet(sheet_name: str, db_projects_info: list, project_indexes: dict):
-    for project_info in db_projects_info:
-        cell_num = project_indexes[project_info["project_name"]]
-        write_to_cell_google_sheet(project_info['contacts'], settings.GS_TABLE_ID, sheet_name, f"C{cell_num}")
-        write_to_cell_google_sheet(project_info['dialogs'], settings.GS_TABLE_ID, sheet_name, f"F{cell_num}")
-        write_to_cell_google_sheet(project_info['leads'], settings.GS_TABLE_ID, sheet_name, f"J{cell_num}")
+def calc_cell_letter(start_cell: str, shift: int):
+    new_letter = chr(ord(start_cell[-1]) + shift)
+    if new_letter > "z":
+        if len(start_cell) == 1:
+            return f"A{chr(ord(new_letter)-26)}"
+        else:
+            return f"{chr(ord(start_cell[0])+1)}{chr(ord(new_letter)-26)}"
+    else:
+        return f"{start_cell[:-1]}{new_letter}"
+
+
+def write_project_stat_to_google_sheet(sheet_name: str, projects_stat: dict, projects_indexes: dict, is_prev=False):
+    start_cell_letter = "AE" if is_prev else "A"
+    write_to_cell_google_sheet(
+        sheet_name,
+        settings.GS_TABLE_ID,
+        sheet_name,
+        f"{calc_cell_letter(start_cell_letter, 2)}1"
+    )
+    write_to_cell_google_sheet(
+        sheet_name,
+        settings.GS_TABLE_ID,
+        sheet_name,
+        f"{start_cell_letter}32"
+    )
+    # Соответствие названия поля, куда мы вписываем значение, с его сдвигом от start_cell_letter
+    field_table_shift = {
+        "contacts": 2,
+        "dialogs": 5,
+        "leads": 9,
+    }
+    for project_name, project_info in projects_stat.items():
+        cell_num = projects_indexes[project_name]
+        for field_name, shift in field_table_shift.items():
+            write_to_cell_google_sheet(
+                project_info[field_name],
+                settings.GS_TABLE_ID,
+                sheet_name,
+                f"{calc_cell_letter(start_cell_letter, shift)}{cell_num}"
+            )
+
+
+def write_prev_data_to_google_sheet(sheet_name: str, prev_sheet_name: str):
+    prev_table = get_table_data(settings.GS_TABLE_ID, prev_sheet_name, "A:AC")
+    write_to_google_sheet(prev_table, settings.GS_TABLE_ID, sheet_name, "AE1:BG54")
 
 
 def create_sheet_copy(copy_table_id: str, copy_sheet_id: int):

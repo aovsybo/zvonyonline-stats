@@ -50,7 +50,7 @@ class SkorozvonAPI:
         return [
             project["id"]
             for project in response["data"]
-            if project["title"] in settings.GS_TO_SKOROZVON_NAME.values()
+            if project["title"] in settings.SKOROZVON_TO_GS_NAME.keys()
         ]
 
     async def get_one_project_stat_by_id(self, session, project_id: str, start_time: int):
@@ -71,7 +71,7 @@ class SkorozvonAPI:
         }
         return self.get_request("calls", params)
 
-    async def get_projects_stat(self, start_time: int):
+    async def create_async_projects_stat_tasks(self, start_time: int):
         async with aiohttp.ClientSession() as session:
             tasks = [
                 asyncio.create_task(self.get_one_project_stat_by_id(session, project_id, start_time))
@@ -79,6 +79,14 @@ class SkorozvonAPI:
             ]
             return await asyncio.gather(*tasks)
 
-    def get_data(self):
+    def get_projects_stat(self):
         start_time = int(time.mktime((datetime.now() - timedelta(hours=1)).timetuple()))
-        return asyncio.run(self.get_projects_stat(start_time))
+        projects_stat = asyncio.run(self.create_async_projects_stat_tasks(start_time))
+        return {
+            settings.SKOROZVON_TO_GS_NAME[project["title"]]: {
+                "contacts": project["cases_count"],
+                "dialogs": project["completed_cases_count"],
+                "leads": 1,
+            }
+            for project in projects_stat
+        }
