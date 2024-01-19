@@ -118,11 +118,11 @@ def write_project_stat_to_google_sheet(sheet_name: str, projects_stat: dict, pro
         "dialogs": 5,
         "leads": 9,
     }
-    for project in projects_stat:
-        cell_num = projects_indexes[project["project_name"]]
+    for project_name, project_stat in projects_stat.items():
+        cell_num = projects_indexes[settings.SKOROZVON_PROJECT_TO_GS_NAME[project_name]]
         for field_name, shift in field_table_shift.items():
             write_to_cell_google_sheet(
-                project[field_name],
+                project_stat[field_name],
                 settings.GS_TABLE_ID,
                 sheet_name,
                 f"{calc_cell_letter(start_cell_letter, shift)}{cell_num}"
@@ -183,5 +183,3 @@ def get_sz_to_gs_data():
         )[1:]
         if scenario[0] != "-"
     }
-
-

@@ -33,25 +33,25 @@ class WriteDataToGoogleSheet(ListAPIView):
         skorozvon = SkorozvonAPI()
         projects_ids = skorozvon.get_projects_ids()
         start_date = int(datetime.timestamp(datetime.now() - timedelta(weeks=2)))
-        data = dict()
+        projects_stat = dict()
         for project_name, project_id in projects_ids.items():
             project_calls_ids = list(self.serializer_class(self.get_queryset(
                 start_date=start_date,
                 project_id=project_id
             ), many=True).data)
-            data[project_name] = dict()
-            data[project_name]["contacts"] = len(project_calls_ids)
-            data[project_name]["dialogs"] = int(len(project_calls_ids) * 0.8)
-            data[project_name]["leads"] = int(len(project_calls_ids) * 0.1)
+            projects_stat[project_name] = dict()
+            projects_stat[project_name]["contacts"] = len(project_calls_ids)
+            projects_stat[project_name]["dialogs"] = int(len(project_calls_ids) * 0.8)
+            projects_stat[project_name]["leads"] = int(len(project_calls_ids) * 0.1)
         # Копируем лист шаблон
-        # sheet_name = get_data_diapason(week=0)
-    #     create_main_sheet_copy(sheet_name)
-    #     # TODO: Заменить проекты на сценарии
-    #     # TODO: async
-    #     write_project_stat_to_google_sheet(
-    #         sheet_name=sheet_name,
-    #         projects_stat=projects_stat,
-    #         projects_indexes=get_project_indexes(),
-    #     )
-    #     write_prev_data_to_google_sheet(sheet_name, get_data_diapason(week=2))
-        return Response(data=data, status=status.HTTP_200_OK)
+        sheet_name = get_data_diapason(week=0)
+        create_main_sheet_copy(sheet_name)
+        # TODO: Заменить проекты на сценарии
+        # TODO: async
+        write_project_stat_to_google_sheet(
+            sheet_name=sheet_name,
+            projects_stat=projects_stat,
+            projects_indexes=get_project_indexes(),
+        )
+        write_prev_data_to_google_sheet(sheet_name, get_data_diapason(week=2))
+        return Response(status=status.HTTP_200_OK)
