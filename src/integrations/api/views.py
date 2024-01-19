@@ -39,6 +39,7 @@ class WriteDataToGoogleSheet(ListAPIView):
                 start_date=start_date,
                 project_id=project_id
             ), many=True).data)
+            data[project_name] = dict()
             data[project_name]["contacts"] = len(project_calls_ids)
             data[project_name]["dialogs"] = int(len(project_calls_ids) * 0.8)
             data[project_name]["leads"] = int(len(project_calls_ids) * 0.1)
