@@ -11,11 +11,11 @@ from django.db import models
 class Leads(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=255, blank=True, null=True)
-    phone_number = models.CharField(max_length=255, blank=True, null=True)
+    phoneNumber = models.CharField(max_length=255, blank=True, null=True)
     site = models.CharField(max_length=255, blank=True, null=True)
     comment = models.CharField(max_length=255, blank=True, null=True)
-    project_id = models.IntegerField(blank=True, null=True)
-    add_date = models.IntegerField(blank=True, null=True)
+    projectId = models.IntegerField(blank=True, null=True)
+    addDate = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
