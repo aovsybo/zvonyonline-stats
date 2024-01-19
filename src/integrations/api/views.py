@@ -35,15 +35,17 @@ class WriteDataToGoogleSheet(ListAPIView):
         start_date = int(datetime.timestamp(datetime.now() - timedelta(weeks=2)))
         data = dict()
         for project_name, project_id in projects_ids.items():
-            data[project_name] = len(list(self.serializer_class(self.get_queryset(
+            project_calls_ids = list(self.serializer_class(self.get_queryset(
                 start_date=start_date,
                 project_id=project_id
-            ), many=True).data))
+            ), many=True).data)
+            data[project_name]["contacts"] = len(project_calls_ids)
+            data[project_name]["dialogs"] = int(len(project_calls_ids) * 0.8)
+            data[project_name]["leads"] = int(len(project_calls_ids) * 0.1)
         # Копируем лист шаблон
         # sheet_name = get_data_diapason(week=0)
     #     create_main_sheet_copy(sheet_name)
     #     # TODO: Заменить проекты на сценарии
-    #     # TODO: Парсить данные из существующей БД
     #     # TODO: async
     #     write_project_stat_to_google_sheet(
     #         sheet_name=sheet_name,
