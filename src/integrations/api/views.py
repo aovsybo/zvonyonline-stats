@@ -18,7 +18,9 @@ from integrations.service.google_sheets import (
 
 
 class CreateCallsAPIView(CreateAPIView, UpdateAPIView):
-    serializer_class = LeadsSerializer
+    # serializer_class = LeadsSerializer
+    def post(self):
+      return Response(status=status.HTTP_200_OK)
 
 
 def get_data_diapason(week: int):
