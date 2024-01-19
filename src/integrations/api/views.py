@@ -17,12 +17,6 @@ from integrations.service.google_sheets import (
 )
 
 
-class CreateCallsAPIView(CreateAPIView, UpdateAPIView):
-    # serializer_class = LeadsSerializer
-    def post(self):
-      return Response(status=status.HTTP_200_OK)
-
-
 def get_data_diapason(week: int):
     return (f"{(datetime.utcnow() - timedelta(weeks=week+2)).strftime('%d.%m.%y')}-"
             f"{(datetime.utcnow() - timedelta(weeks=week)).strftime('%d.%m.%y')}")
@@ -30,20 +24,23 @@ def get_data_diapason(week: int):
 
 class WriteDataToGoogleSheet(ListAPIView):
     serializer_class = LeadsSerializer
-    queryset = Leads.objects.all()[:10]
 
-    # def get(self, request):
-    #     skorozvon = SkorozvonAPI()
-    #     data = skorozvon.get_scenarios_ids()
-    #     return Response(data=data, status=status.HTTP_200_OK)
+    def get_queryset(self, start_date, project_id):
+        return Leads.objects.filter(addDate__gt=start_date).filter(projectId=project_id)
 
-    # def get(self, request):
-    #     # Получаем статистику со скорозвона
-    #     skorozvon = SkorozvonAPI()
-    #     # projects_stat = skorozvon.get_projects_stat()
-    #     projects_stat = list(self.serializer_class(self.get_queryset(), many=True).data)
-    #     # Копируем лист шаблон
-    #     sheet_name = get_data_diapason(week=0)
+    def get(self, request):
+        # Получаем статистику со скорозвона
+        skorozvon = SkorozvonAPI()
+        projects_ids = skorozvon.get_projects_ids()
+        start_date = int(datetime.timestamp(datetime.now() - timedelta(weeks=2)))
+        data = dict()
+        for project_name, project_id in projects_ids.items():
+            data[project_name] = len(list(self.serializer_class(self.get_queryset(
+                start_date=start_date,
+                project_id=project_id
+            ), many=True).data))
+        # Копируем лист шаблон
+        # sheet_name = get_data_diapason(week=0)
     #     create_main_sheet_copy(sheet_name)
     #     # TODO: Заменить проекты на сценарии
     #     # TODO: Парсить данные из существующей БД
@@ -54,4 +51,4 @@ class WriteDataToGoogleSheet(ListAPIView):
     #         projects_indexes=get_project_indexes(),
     #     )
     #     write_prev_data_to_google_sheet(sheet_name, get_data_diapason(week=2))
-    #     return Response(status=status.HTTP_200_OK)
+        return Response(data=data, status=status.HTTP_200_OK)

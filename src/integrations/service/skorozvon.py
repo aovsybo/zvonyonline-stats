@@ -50,8 +50,20 @@ class SkorozvonAPI:
         return {
             project["name"]: project["id"]
             for project in response["data"]
-            if project["name"] in settings.SKOROZVON_TO_GS_NAME.keys()
+            if project["name"] in settings.SKOROZVON_SCENARIO_TO_GS_NAME.keys()
         }
+
+    def get_projects_ids(self):
+        response = self.get_request(
+            sub_url="call_projects",
+            params={"length": 100},
+        )
+        return {
+            project["title"]: project["id"]
+            for project in response["data"]
+            if project["title"] in settings.SKOROZVON_PROJECT_TO_GS_NAME.keys()
+        }
+
     #
     # async def get_one_project_stat_by_id(self, session, project_id: str, start_time: int):
     #     return await self.get_async_request(
