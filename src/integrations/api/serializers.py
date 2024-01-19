@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from integrations.models import CallInfo
+from integrations.models import Leads
 
 
-class CallInfoSerializer(serializers.ModelSerializer):
+class LeadsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CallInfo
+        model = Leads
         fields = '__all__'

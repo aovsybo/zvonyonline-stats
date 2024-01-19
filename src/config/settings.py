@@ -36,14 +36,14 @@ GS_TABLE_ID = os.environ.get("GS_TABLE_ID")
 GS_MAIN_SHEET_ID = os.environ.get("GS_MAIN_SHEET_ID")
 GS_MAIN_SHEET_NAME = "Шаблон"
 SKOROZVON_TO_GS_NAME = {
-    "ЮСИ. Лидген с Авито. РнД": "ЮСИ. Лидген с Авито РнД",
-    "ЮСИ ГКЦ РнД": "ЮСИ. ГКЦ РнД",
-    "ЮСИ. Сайты ЖК РнД (проект с оплатой за лид)": "ЮСИ. Сайты ЖК РнД. (Проект с оплатой за лид)",
-    "ЮСИ. Лидген с Авито СТВ 15.08.2023": "ЮСИ. Лидген с Авито Ств",
+    "ЮСИ. Лидген Авито РНД": "ЮСИ. Лидген с Авито РнД",
+    "22.12.23 ЮСИ база Крд": "ЮСИ. ГКЦ РнД",
+    "ЮСИ. Сайты ЖК РНД (проект с оплатой за лид)": "ЮСИ. Сайты ЖК РнД. (Проект с оплатой за лид)",
+    "ЮСИ.СТВ Лидген с Авито ": "ЮСИ. Лидген с Авито Ств",
     "ЮСИ ГКЦ Ств": "ЮСИ. ГКЦ Ств",
-    "ЮСИ. Сайты ЖК СТВ (проект с оплатой за лид)": "ЮСИ. Сайты ЖК Ств. (Проект с оплатой за лид)",
-    "ЮСИ Сайты ЖК Кдр (проект с оплатой за лид)": "ЮСИ. Сайты ЖК Крд. (Проект с оплатой за лид)",
-    "ЮСИ ГКЦ Крд": "ЮСИ. ГКЦ Крд",
+    "ЮСИ. Сайты ЖК Ств (проект с оплатой за лид) ": "ЮСИ. Сайты ЖК Ств. (Проект с оплатой за лид)",
+    "ЮСИ Сайты Крд (проект с оплатой за лид)": "ЮСИ. Сайты ЖК Крд. (Проект с оплатой за лид)",
+    "ЮСИ ГКЦ Крд": "ЮСИ. ГКЦ Крд"
 }
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -100,14 +100,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME':  os.environ.get("POSTGRES_DB"),
-        'USER':  os.environ.get("POSTGRES_USER"),
-        'PASSWORD':  os.environ.get("POSTGRES_PASSWORD"),
-        'HOST':  os.environ.get("POSTGRES_HOST"),
-        'PORT':  os.environ.get("POSTGRES_PORT", 5432),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME':  os.environ.get("MYSQL_DB"),
+        'USER':  os.environ.get("MYSQL_USER"),
+        'PASSWORD':  os.environ.get("MYSQL_PASSWORD"),
+        'HOST':  os.environ.get("MYSQL_HOST"),
+        'PORT':  os.environ.get("POSTGRES_PORT", 3306),
     }
 }
 

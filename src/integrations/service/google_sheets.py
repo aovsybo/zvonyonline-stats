@@ -118,11 +118,11 @@ def write_project_stat_to_google_sheet(sheet_name: str, projects_stat: dict, pro
         "dialogs": 5,
         "leads": 9,
     }
-    for project_name, project_info in projects_stat.items():
-        cell_num = projects_indexes[project_name]
+    for project in projects_stat:
+        cell_num = projects_indexes[project["project_name"]]
         for field_name, shift in field_table_shift.items():
             write_to_cell_google_sheet(
-                project_info[field_name],
+                project[field_name],
                 settings.GS_TABLE_ID,
                 sheet_name,
                 f"{calc_cell_letter(start_cell_letter, shift)}{cell_num}"
@@ -173,5 +173,15 @@ def create_main_sheet_copy(sheet_name: str):
     return response["sheetId"]
 
 
+def get_sz_to_gs_data():
+    return {
+        scenario[0]: scenario[1]
+        for scenario in get_table_data(
+            settings.GS_TABLE_ID,
+            "Соответствия",
+            "B:C"
+        )[1:]
+        if scenario[0] != "-"
+    }
 
 

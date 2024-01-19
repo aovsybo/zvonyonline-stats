@@ -42,23 +42,23 @@ class SkorozvonAPI:
         ) as response:
             return await response.json(content_type=None)
 
-    def get_projects_ids(self):
+    def get_scenarios_ids(self):
         response = self.get_request(
-            sub_url="call_projects",
+            sub_url="scenarios",
             params={"length": 100},
         )
-        return [
-            project["id"]
+        return {
+            project["name"]: project["id"]
             for project in response["data"]
-            if project["title"] in settings.SKOROZVON_TO_GS_NAME.keys()
-        ]
-
-    async def get_one_project_stat_by_id(self, session, project_id: str, start_time: int):
-        return await self.get_async_request(
-            session=session,
-            sub_url=f"call_projects/{project_id}/statistic",
-            params={"start_time": start_time},
-        )
+            if project["name"] in settings.SKOROZVON_TO_GS_NAME.keys()
+        }
+    #
+    # async def get_one_project_stat_by_id(self, session, project_id: str, start_time: int):
+    #     return await self.get_async_request(
+    #         session=session,
+    #         sub_url=f"call_projects/{project_id}/statistic",
+    #         params={"start_time": start_time},
+    #     )
 
     def get_calls(self, project_id: int, start_time: int):
         params = {
@@ -71,22 +71,22 @@ class SkorozvonAPI:
         }
         return self.get_request("calls", params)
 
-    async def create_async_projects_stat_tasks(self, start_time: int):
-        async with aiohttp.ClientSession() as session:
-            tasks = [
-                asyncio.create_task(self.get_one_project_stat_by_id(session, project_id, start_time))
-                for project_id in self.get_projects_ids()
-            ]
-            return await asyncio.gather(*tasks)
+    # async def create_async_projects_stat_tasks(self, start_time: int):
+    #     async with aiohttp.ClientSession() as session:
+    #         tasks = [
+    #             asyncio.create_task(self.get_one_project_stat_by_id(session, project_id, start_time))
+    #             for project_id in self.get_projects_ids()
+    #         ]
+    #         return await asyncio.gather(*tasks)
 
-    def get_projects_stat(self):
-        start_time = int(time.mktime((datetime.now() - timedelta(hours=1)).timetuple()))
-        projects_stat = asyncio.run(self.create_async_projects_stat_tasks(start_time))
-        return {
-            settings.SKOROZVON_TO_GS_NAME[project["title"]]: {
-                "contacts": project["cases_count"],
-                "dialogs": project["completed_cases_count"],
-                "leads": 1,
-            }
-            for project in projects_stat
-        }
+    # def get_projects_stat(self):
+    #     start_time = int(time.mktime((datetime.now() - timedelta(hours=1)).timetuple()))
+    #     projects_stat = asyncio.run(self.create_async_projects_stat_tasks(start_time))
+    #     return {
+    #         settings.SKOROZVON_TO_GS_NAME[project["title"]]: {
+    #             "contacts": project["cases_count"],
+    #             "dialogs": project["completed_cases_count"],
+    #             "leads": 1,
+    #         }
+    #         for project in projects_stat
+    #     }
