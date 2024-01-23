@@ -53,3 +53,6 @@ class SkorozvonAPI:
             for project in response["data"]
             if project["title"] in settings.SKOROZVON_PROJECT_TO_GS_NAME.keys()
         }
+
+
+skorozvon_api = SkorozvonAPI()
