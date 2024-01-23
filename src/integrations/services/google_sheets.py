@@ -147,7 +147,7 @@ def create_sheet_copy(copy_table_id: str, copy_sheet_id: int):
     return response
 
 
-def update_sheet_name(sheet_id: int, new_name: str):
+def update_sheet_property(sheet_id: int, field_name: str, field_value: str):
     service = get_service()
     body = {
         'requests':
@@ -155,9 +155,9 @@ def update_sheet_name(sheet_id: int, new_name: str):
             "updateSheetProperties": {
                 "properties": {
                     "sheetId": sheet_id,
-                    "title": new_name,
+                    field_name: field_value,
                 },
-                "fields": "title",
+                "fields": field_name,
             }
         }
     }
@@ -169,7 +169,8 @@ def create_main_sheet_copy(sheet_name: str):
         settings.GS_TABLE_ID,
         settings.GS_MAIN_SHEET_ID,
     )
-    update_sheet_name(response["sheetId"], sheet_name)
+    update_sheet_property(response["sheetId"], "title", sheet_name)
+    update_sheet_property(response["sheetId"], "index", "0")
     return response["sheetId"]
 
 
