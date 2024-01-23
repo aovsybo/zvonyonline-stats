@@ -2,13 +2,13 @@ from django.db import models
 
 
 class Leads(models.Model):
-    id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
-    phoneNumber = models.CharField(max_length=255, blank=True, null=True)
-    site = models.CharField(max_length=255, blank=True, null=True)
-    comment = models.CharField(max_length=255, blank=True, null=True)
-    projectId = models.CharField(max_length=100, blank=True, null=True)
-    addDate = models.IntegerField(blank=True, null=True)
+    id = models.IntegerField(primary_key=True, auto_created=True)
+    name = models.CharField(max_length=255, blank=True)
+    phoneNumber = models.CharField(max_length=255, blank=True)
+    site = models.CharField(max_length=255, blank=True)
+    comment = models.CharField(max_length=255, blank=True)
+    projectId = models.CharField(max_length=100, blank=True)
+    addDate = models.IntegerField(blank=True)
 
     class Meta:
         managed = False
@@ -16,13 +16,13 @@ class Leads(models.Model):
 
 
 class QualifiedLeads(models.Model):
-    id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
-    phoneNumber = models.CharField(max_length=255, blank=True, null=True)
-    site = models.CharField(max_length=255, blank=True, null=True)
-    comment = models.CharField(max_length=255, blank=True, null=True)
-    projectId = models.CharField(max_length=100, blank=True, null=True)
-    addDate = models.IntegerField(blank=True, null=True)
+    id = models.IntegerField(primary_key=True, auto_created=True)
+    name = models.CharField(max_length=255, blank=True)
+    phoneNumber = models.CharField(max_length=255, blank=True)
+    site = models.CharField(max_length=255, blank=True)
+    comment = models.CharField(max_length=255, blank=True)
+    projectId = models.CharField(max_length=100, blank=True)
+    addDate = models.IntegerField(blank=True)
 
     class Meta:
         managed = False
@@ -30,13 +30,13 @@ class QualifiedLeads(models.Model):
 
 
 class Dialogs(models.Model):
-    id = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=255, blank=True, null=True)
-    phoneNumber = models.CharField(max_length=255, blank=True, null=True)
-    site = models.CharField(max_length=255, blank=True, null=True)
-    comment = models.CharField(max_length=255, blank=True, null=True)
-    projectId = models.CharField(max_length=100, blank=True, null=True)
-    addDate = models.IntegerField(blank=True, null=True)
+    id = models.IntegerField(primary_key=True, auto_created=True)
+    name = models.CharField(max_length=255, blank=True)
+    phoneNumber = models.CharField(max_length=255, blank=True)
+    site = models.CharField(max_length=255, blank=True)
+    comment = models.CharField(max_length=255, blank=True)
+    projectId = models.CharField(max_length=100, blank=True)
+    addDate = models.IntegerField(blank=True)
 
     class Meta:
         managed = False

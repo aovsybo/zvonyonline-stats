@@ -1,9 +1,21 @@
 from rest_framework import serializers
 
-from integrations.models import Leads
+from integrations.models import Leads, Dialogs, QualifiedLeads
 
 
 class LeadsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Leads
-        fields = '__all__'
+        exclude = ('id',)
+
+
+class DialogsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dialogs
+        exclude = ('id',)
+
+
+class QualifiedLeadsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QualifiedLeads
+        exclude = ('id',)

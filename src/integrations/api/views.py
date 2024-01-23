@@ -28,6 +28,8 @@ class WriteDataToGoogleSheet(ListAPIView):
                 "leads": self.get_queryset(model=QualifiedLeads, start_date=start_date, project_id=project_id),
             }
         # TODO: Заменить проекты на сценарии
+        # TODO: Проверка на наличие нужной таблицы
+        # TODO: Интерфейс
         # TODO: async
         google_sheets_api.create_report_sheet(projects_stat)
         return Response(status=status.HTTP_200_OK)
