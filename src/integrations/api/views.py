@@ -27,9 +27,8 @@ class WriteDataToGoogleSheet(ListAPIView):
                 "dialogs": self.get_queryset(model=Dialogs, start_date=start_date, project_id=project_id),
                 "leads": self.get_queryset(model=QualifiedLeads, start_date=start_date, project_id=project_id),
             }
-        # TODO: Заменить проекты на сценарии
         # TODO: Проверка на наличие нужной таблицы
-        # TODO: Интерфейс
+        # TODO: Интерфейс готовый взять, кнопка в гугл талицах
         # TODO: async
         google_sheets_api.create_report_sheet(projects_stat)
         return Response(status=status.HTTP_200_OK)
