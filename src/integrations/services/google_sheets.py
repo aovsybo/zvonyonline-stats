@@ -222,9 +222,7 @@ class GoogleSheetsApi:
         Далее в данный лист записываются актуальные данные и данные из прошлой таблицы для сравнения
         :param projects_stat: словарь, позволяющий получить статистику проекта по имени
         """
-
         sheet_name = self.create_sheet_name()
-        prev_sheet_name = self.get_data_diapason(week=2)
         sheet_id = self.create_sheet_copy(
             settings.GS_TABLE_ID,
             settings.GS_MAIN_SHEET_ID,
@@ -235,7 +233,10 @@ class GoogleSheetsApi:
             sheet_name=sheet_name,
             projects_stat=projects_stat,
         )
-        self.write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
+
+        prev_sheet_name = self.get_data_diapason(week=2)
+        if prev_sheet_name in self.get_sheet_names():
+            self.write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
 
 
 google_sheets_api = GoogleSheetsApi()
