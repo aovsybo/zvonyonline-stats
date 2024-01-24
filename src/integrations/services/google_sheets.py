@@ -244,7 +244,7 @@ class GoogleSheetsApi:
         while True:
             if sheet_name in sheet_names:
                 postfix += 1
-                sheet_name = f"{sheet_name.split('(')[0]} ({postfix})"
+                sheet_name = f"{sheet_name.split(' (')[0]} ({postfix})"
             else:
                 return sheet_name
 
