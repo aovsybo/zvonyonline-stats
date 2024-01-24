@@ -150,17 +150,29 @@ class GoogleSheetsApi:
                     f"{self.calc_cell_letter(start_cell_letter, shift)}{cell_num}"
                 )
 
-    def get_date_from_sheet_name(self, time: str, index: int):
-        return datetime.strptime(time.split(" (")[0].split("-")[index], self.DATE_FORMAT_FOR_SHEET_NAME)
+    def get_date_from_sheet_name(self, sheet_name: str, index: int):
+        """
+        Функия получает дату из названия листа
+        :param sheet_name: Название листа
+        :param index: Индекс (1 или 0) в зависимости от того, нужно получить начальную или конечную дату
+        :return: полученную дату в формате datetime
+        """
+        return datetime.strptime(sheet_name.split(" (")[0].split("-")[index], self.DATE_FORMAT_FOR_SHEET_NAME)
 
     def get_prev_sheet_name(self, current_sheet_name: str):
+        """
+        Функция получает название предыдущего листа,
+        чья конечная дата наиболее приближена к начальной дате текущего листа
+        :param current_sheet_name: Имя текущего листа
+        :return: Название предыдущего листа
+        """
         start_date = self.get_date_from_sheet_name(current_sheet_name, 0)
         sheet_names = self.get_sheet_names()
         validated_sheet_names = list(filter(lambda sheet_name: "-" in sheet_name, sheet_names))
-        last_dates = min(validated_sheet_names, key=lambda sheet_name: abs(
+        prev_sheet_name = min(validated_sheet_names, key=lambda sheet_name: abs(
             start_date - self.get_date_from_sheet_name(sheet_name, 1)
         ))
-        return last_dates
+        return prev_sheet_name
 
     def write_prev_data_to_google_sheet(self, sheet_name: str):
         """
@@ -212,11 +224,20 @@ class GoogleSheetsApi:
         self._service.spreadsheets().batchUpdate(spreadsheetId=settings.GS_TABLE_ID, body=body).execute()
 
     def get_sheet_names(self):
+        """
+        Функция возвращает имена листов в таблице
+        :return: Список имен
+        """
         sheet_metadata = self._service.spreadsheets().get(spreadsheetId=settings.GS_TABLE_ID).execute()
         sheets = sheet_metadata.get('sheets', '')
         return [sheet.get("properties", {}).get("title", "") for sheet in sheets]
 
     def create_sheet_name(self):
+        """
+        Функция создает имя для листа из диапазона даты
+        Если лист с таким название существует - возвращает <имя (номер копии)>
+        :return: Имя листа
+        """
         sheet_name = self.get_data_diapason(week=0)
         sheet_names = self.get_sheet_names()
         postfix = 0
