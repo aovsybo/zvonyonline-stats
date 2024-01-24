@@ -12,6 +12,7 @@ from django.conf import settings
 class GoogleSheetsApi:
     MAIN_TABLE_RANGE = "A:AC"
     PREV_TABLE_RANGE = "AE1:BG54"
+    DATE_FORMAT_FOR_SHEET_NAME = '%d.%m.%y'
     _service = None
 
     def __init__(self):
@@ -107,10 +108,9 @@ class GoogleSheetsApi:
         else:
             return f"{start_cell[:-1]}{new_letter}"
 
-    @staticmethod
-    def get_data_diapason(week: int):
-        return (f"{(datetime.utcnow() - timedelta(weeks=week + 2)).strftime('%d.%m.%y')}-"
-                f"{(datetime.utcnow() - timedelta(weeks=week)).strftime('%d.%m.%y')}")
+    def get_data_diapason(self, week: int):
+        return (f"{(datetime.utcnow() - timedelta(weeks=week + 2)).strftime(self.DATE_FORMAT_FOR_SHEET_NAME)}-"
+                f"{(datetime.utcnow() - timedelta(weeks=week)).strftime(self.DATE_FORMAT_FOR_SHEET_NAME)}")
 
     def write_project_stat_to_google_sheet(self, sheet_name: str, projects_stat: dict, is_prev=False):
         """
@@ -150,14 +150,26 @@ class GoogleSheetsApi:
                     f"{self.calc_cell_letter(start_cell_letter, shift)}{cell_num}"
                 )
 
-    def write_prev_data_to_google_sheet(self, sheet_name: str, prev_sheet_name: str):
+    def get_date_from_sheet_name(self, time: str, index: int):
+        return datetime.strptime(time.split(" (")[0].split("-")[index], self.DATE_FORMAT_FOR_SHEET_NAME)
+
+    def get_prev_sheet_name(self, current_sheet_name: str):
+        start_date = self.get_date_from_sheet_name(current_sheet_name, 0)
+        sheet_names = self.get_sheet_names()
+        validated_sheet_names = list(filter(lambda sheet_name: "-" in sheet_name, sheet_names))
+        last_dates = min(validated_sheet_names, key=lambda sheet_name: abs(
+            start_date - self.get_date_from_sheet_name(sheet_name, 1)
+        ))
+        return last_dates
+
+    def write_prev_data_to_google_sheet(self, sheet_name: str):
         """
         Гугл-таблица состоит из двух таблиц - данные за текущий интервал, и данные за прошлый интервал.
         Функция берет данные из прошлой таблцы "текущий интервал" и заносит их в новую таблицу в "прошлый интервал"
         :param sheet_name:
-        :param prev_sheet_name:
         :return:
         """
+        prev_sheet_name = self.get_prev_sheet_name(sheet_name)
         previous_table_data = self.get_table_data(settings.GS_TABLE_ID, prev_sheet_name, self.MAIN_TABLE_RANGE)
         self.write_to_google_sheet(previous_table_data, settings.GS_TABLE_ID, sheet_name, self.PREV_TABLE_RANGE)
 
@@ -233,10 +245,7 @@ class GoogleSheetsApi:
             sheet_name=sheet_name,
             projects_stat=projects_stat,
         )
-
-        prev_sheet_name = self.get_data_diapason(week=2)
-        if prev_sheet_name in self.get_sheet_names():
-            self.write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
+        self.write_prev_data_to_google_sheet(sheet_name)
 
 
 google_sheets_api = GoogleSheetsApi()
