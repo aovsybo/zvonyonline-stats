@@ -199,6 +199,22 @@ class GoogleSheetsApi:
         }
         self._service.spreadsheets().batchUpdate(spreadsheetId=settings.GS_TABLE_ID, body=body).execute()
 
+    def get_sheet_names(self):
+        sheet_metadata = self._service.spreadsheets().get(spreadsheetId=settings.GS_TABLE_ID).execute()
+        sheets = sheet_metadata.get('sheets', '')
+        return [sheet.get("properties", {}).get("title", "") for sheet in sheets]
+
+    def create_sheet_name(self):
+        sheet_name = self.get_data_diapason(week=0)
+        sheet_names = self.get_sheet_names()
+        postfix = 0
+        while True:
+            if sheet_name in sheet_names:
+                postfix += 1
+                sheet_name = f"{sheet_name.split('(')[0]} ({postfix})"
+            else:
+                return sheet_name
+
     def create_report_sheet(self, projects_stat: dict):
         """
         Функция формирует отчет по статистике в таблицу.
@@ -206,7 +222,8 @@ class GoogleSheetsApi:
         Далее в данный лист записываются актуальные данные и данные из прошлой таблицы для сравнения
         :param projects_stat: словарь, позволяющий получить статистику проекта по имени
         """
-        sheet_name = self.get_data_diapason(week=0)
+
+        sheet_name = self.create_sheet_name()
         prev_sheet_name = self.get_data_diapason(week=2)
         sheet_id = self.create_sheet_copy(
             settings.GS_TABLE_ID,
