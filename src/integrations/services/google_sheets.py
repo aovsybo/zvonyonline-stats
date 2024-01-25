@@ -117,7 +117,6 @@ class GoogleSheetsApi:
         Функция записывает статистику по проектам за интервал в таблицу
         :param sheet_name: имя листа в гугл таблице, куда идет запись
         :param projects_stat: словарь, позволяющий получить статистику проекта по имени
-        :param projects_indexes: словарь с соотвествием номера строки проекта в гугл таблице и именем проекта
         :param is_prev: флаг, определяющий записывать ли в диапазон текущих данных или диапазон прошлых данных
         """
         start_cell_letter = "AE" if is_prev else "A"
@@ -174,14 +173,14 @@ class GoogleSheetsApi:
         ))
         return prev_sheet_name
 
-    def write_prev_data_to_google_sheet(self, sheet_name: str):
+    def write_prev_data_to_google_sheet(self, sheet_name: str, prev_sheet_name: str):
         """
         Гугл-таблица состоит из двух таблиц - данные за текущий интервал, и данные за прошлый интервал.
         Функция берет данные из прошлой таблцы "текущий интервал" и заносит их в новую таблицу в "прошлый интервал"
-        :param sheet_name:
+        :param sheet_name: Имя текущего листа
+        :param prev_sheet_name: Имя прошлого листа
         :return:
         """
-        prev_sheet_name = self.get_prev_sheet_name(sheet_name)
         previous_table_data = self.get_table_data(settings.GS_TABLE_ID, prev_sheet_name, self.MAIN_TABLE_RANGE)
         self.write_to_google_sheet(previous_table_data, settings.GS_TABLE_ID, sheet_name, self.PREV_TABLE_RANGE)
 
@@ -232,13 +231,12 @@ class GoogleSheetsApi:
         sheets = sheet_metadata.get('sheets', '')
         return [sheet.get("properties", {}).get("title", "") for sheet in sheets]
 
-    def create_sheet_name(self):
+    def create_sheet_name(self, sheet_name):
         """
-        Функция создает имя для листа из диапазона даты
-        Если лист с таким название существует - возвращает <имя (номер копии)>
+        Функция провреяет лист на дубли, и если лист с таким название существует - возвращает <имя (номер копии)>
+        :param sheet_name: имя листа
         :return: Имя листа
         """
-        sheet_name = self.get_data_diapason(week=0)
         sheet_names = self.get_sheet_names()
         postfix = 0
         while True:
@@ -248,14 +246,22 @@ class GoogleSheetsApi:
             else:
                 return sheet_name
 
-    def create_report_sheet(self, projects_stat: dict):
+    def str_form_unix(self, unix_time: int):
+        return datetime.utcfromtimestamp(unix_time).strftime(self.DATE_FORMAT_FOR_SHEET_NAME)
+
+    def create_report_sheet(self, projects_stat: dict, start_date: int, end_date: int, prev_start_date: int):
         """
         Функция формирует отчет по статистике в таблицу.
         Создается копия листа-шаблона, переименовывается и устанавливается первым при отображении в таблице
         Далее в данный лист записываются актуальные данные и данные из прошлой таблицы для сравнения
         :param projects_stat: словарь, позволяющий получить статистику проекта по имени
         """
-        sheet_name = self.create_sheet_name()
+        sheet_name = self.create_sheet_name(
+            f"{self.str_form_unix(start_date)}-{self.str_form_unix(end_date)}"
+        )
+        prev_sheet_name = self.create_sheet_name(
+            f"{self.str_form_unix(prev_start_date)}-{self.str_form_unix(start_date)}"
+        )
         sheet_id = self.create_sheet_copy(
             settings.GS_TABLE_ID,
             settings.GS_MAIN_SHEET_ID,
@@ -265,8 +271,9 @@ class GoogleSheetsApi:
         self.write_project_stat_to_google_sheet(
             sheet_name=sheet_name,
             projects_stat=projects_stat,
+
         )
-        self.write_prev_data_to_google_sheet(sheet_name)
+        self.write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
 
 
 google_sheets_api = GoogleSheetsApi()

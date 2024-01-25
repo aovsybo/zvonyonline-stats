@@ -60,6 +60,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(',')
 
+APPSCHEDULER_DATETIME_FORMAT = 'N j, Y, f:s a'
 # Application definition
 
 INSTALLED_APPS = [
@@ -71,6 +72,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'django_apscheduler',
 
     'integrations',
 ]
