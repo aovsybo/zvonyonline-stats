@@ -55,7 +55,7 @@ def get_two_weeks_report():
     today = datetime.today()
     if today.day > 15:
         two_weeks_ago = today.replace(day=16)
-        today = (today +relativedelta(months=1)).replace(day=1)
+        today = (today + relativedelta(months=1)).replace(day=1)
     else:
         two_weeks_ago = today.replace(day=1)
         today = today.replace(day=16)
@@ -67,6 +67,6 @@ def get_two_weeks_report():
 
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(get_month_report, 'cron', minute="36")
-    scheduler.add_job(get_two_weeks_report, 'cron', minute="52")
+    scheduler.add_job(get_month_report, 'cron', minute="53")
+    scheduler.add_job(get_two_weeks_report, 'cron', minute="54")
     scheduler.start()
