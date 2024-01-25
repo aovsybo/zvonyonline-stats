@@ -260,7 +260,6 @@ class GoogleSheetsApi:
             f"{self.str_form_unix(start_date)}-{self.str_form_unix(end_date)}"
         )
         prev_sheet_name = f"{self.str_form_unix(prev_start_date)}-{self.str_form_unix(start_date)}"
-        print(sheet_name, prev_sheet_name)
         sheet_id = self.create_sheet_copy(
             settings.GS_TABLE_ID,
             settings.GS_MAIN_SHEET_ID,
