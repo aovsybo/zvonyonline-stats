@@ -201,21 +201,6 @@ class GoogleSheetsApi:
         ).execute()
         return response["sheetId"]
 
-    def get_sheet_id_by_name(self, sheet_name):
-        """
-        Функция получает идентификатор листа по его имени
-        :param sheet_name: имя листа
-        :return: идентификатор листа
-        """
-        sheet_metadata = self._service.spreadsheets().get(spreadsheetId=settings.GS_TABLE_ID).execute()
-        sheets = sheet_metadata.get('sheets', '')
-        sheet_id = [
-            sheet.get("properties").get("sheetId")
-            for sheet in sheets
-            if sheet.get("properties").get("title") == sheet_name
-        ]
-        return sheet_id[0]
-
     def update_sheet_property(self, sheet_id: int, field_name: str, field_value: str):
         """
         Функция изменяет характеристику листа
@@ -262,10 +247,7 @@ class GoogleSheetsApi:
         """
         sheet_name = f"{self.str_form_unix(start_date)}-{self.str_form_unix(end_date)}"
         prev_sheet_name = f"{self.str_form_unix(prev_start_date)}-{self.str_form_unix(start_date)}"
-        if sheet_name in self.get_sheet_names():
-            # TODO: get existing sheet id
-            sheet_id = self.get_sheet_id_by_name(sheet_name)
-        else:
+        if sheet_name not in self.get_sheet_names():
             sheet_id = self.create_sheet_copy(
                 settings.GS_TABLE_ID,
                 settings.GS_MAIN_SHEET_ID,
