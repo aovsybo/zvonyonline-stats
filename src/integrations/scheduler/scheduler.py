@@ -65,8 +65,18 @@ def get_two_weeks_report():
     create_report_for_interval(start_date, end_date, prev_start_date)
 
 
+def update_sheet_names():
+    pass
+
+
+def update_reports():
+    # TODO: fix limits for write
+    get_two_weeks_report()
+    # get_month_report()
+
+
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(get_month_report, 'cron', minute="53")
-    scheduler.add_job(get_two_weeks_report, 'cron', minute="54")
+    scheduler.add_job(update_reports, 'interval', minutes=1)
+    # scheduler.add_job(update_sheet_names, 'cron', day="1,16")
     scheduler.start()

@@ -6,17 +6,25 @@ from ..models import Leads, QualifiedLeads, Dialogs
 from ..services.skorozvon import skorozvon_api
 from ..services.google_sheets import google_sheets_api
 
+from .serializers import LeadsSerializer
+
 
 class WriteDataToGoogleSheet(ListAPIView):
-    @staticmethod
-    def get_db_contacts_count_for_interval(model, start_date, end_date, project_id):
-        return (model.objects
-                .filter(addDate__gte=start_date)
-                .filter(addDate__lt=end_date)
-                .filter(projectId=project_id)
-                .count())
+    # @staticmethod
+    # def get_db_contacts_count_for_interval(model, start_date, end_date, project_id):
+    #     return (model.objects
+    #             .filter(addDate__gte=start_date)
+    #             .filter(addDate__lt=end_date)
+    #             .filter(projectId=project_id)
+    #             .count())
+    serializer_class = LeadsSerializer
 
     def get(self, request, *args, **kwargs):
+        data = dict()
+        data["props"] = google_sheets_api.get_sheet_properties()
+        return Response(data=data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
         # projects_ids = skorozvon_api.get_projects_ids()
         # start_date = request.data.get("start_date")
         # end_date = request.data.get("end_date")

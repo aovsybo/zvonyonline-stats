@@ -201,6 +201,21 @@ class GoogleSheetsApi:
         ).execute()
         return response["sheetId"]
 
+    def get_sheet_id_by_name(self, sheet_name):
+        """
+        Функция получает идентификатор листа по его имени
+        :param sheet_name: имя листа
+        :return: идентификатор листа
+        """
+        sheet_metadata = self._service.spreadsheets().get(spreadsheetId=settings.GS_TABLE_ID).execute()
+        sheets = sheet_metadata.get('sheets', '')
+        sheet_id = [
+            sheet.get("properties").get("sheetId")
+            for sheet in sheets
+            if sheet.get("properties").get("title") == sheet_name
+        ]
+        return sheet_id[0]
+
     def update_sheet_property(self, sheet_id: int, field_name: str, field_value: str):
         """
         Функция изменяет характеристику листа
@@ -231,21 +246,6 @@ class GoogleSheetsApi:
         sheets = sheet_metadata.get('sheets', '')
         return [sheet.get("properties", {}).get("title", "") for sheet in sheets]
 
-    def create_sheet_name(self, sheet_name):
-        """
-        Функция провреяет лист на дубли, и если лист с таким название существует - возвращает <имя (номер копии)>
-        :param sheet_name: имя листа
-        :return: Имя листа
-        """
-        sheet_names = self.get_sheet_names()
-        postfix = 0
-        while True:
-            if sheet_name in sheet_names:
-                postfix += 1
-                sheet_name = f"{sheet_name.split(' (')[0]} ({postfix})"
-            else:
-                return sheet_name
-
     def str_form_unix(self, unix_time: int):
         return datetime.utcfromtimestamp(unix_time).strftime(self.DATE_FORMAT_FOR_SHEET_NAME)
 
@@ -254,18 +254,24 @@ class GoogleSheetsApi:
         Функция формирует отчет по статистике в таблицу.
         Создается копия листа-шаблона, переименовывается и устанавливается первым при отображении в таблице
         Далее в данный лист записываются актуальные данные и данные из прошлой таблицы для сравнения
-        :param projects_stat: словарь, позволяющий получить статистику проекта по имени
+        :param projects_stat: соответствие имени проекта и его статистики
+        :param start_date: дата начала текущего интервала
+        :param end_date: дата конца текущего интервала
+        :param prev_start_date: дата начала прошлого интервала
+        :return:
         """
-        sheet_name = self.create_sheet_name(
-            f"{self.str_form_unix(start_date)}-{self.str_form_unix(end_date)}"
-        )
+        sheet_name = f"{self.str_form_unix(start_date)}-{self.str_form_unix(end_date)}"
         prev_sheet_name = f"{self.str_form_unix(prev_start_date)}-{self.str_form_unix(start_date)}"
-        sheet_id = self.create_sheet_copy(
-            settings.GS_TABLE_ID,
-            settings.GS_MAIN_SHEET_ID,
-        )
-        self.update_sheet_property(sheet_id, "title", sheet_name)
-        self.update_sheet_property(sheet_id, "index", "0")
+        if sheet_name in self.get_sheet_names():
+            # TODO: get existing sheet id
+            sheet_id = self.get_sheet_id_by_name(sheet_name)
+        else:
+            sheet_id = self.create_sheet_copy(
+                settings.GS_TABLE_ID,
+                settings.GS_MAIN_SHEET_ID,
+            )
+            self.update_sheet_property(sheet_id, "title", sheet_name)
+            self.update_sheet_property(sheet_id, "index", "0")
         self.write_project_stat_to_google_sheet(
             sheet_name=sheet_name,
             projects_stat=projects_stat,
