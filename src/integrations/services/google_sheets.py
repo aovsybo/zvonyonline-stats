@@ -273,12 +273,12 @@ class GoogleSheetsApi:
             )
             self.update_sheet_property(sheet_id, "title", sheet_name)
             self.update_sheet_property(sheet_id, "index", "0")
+            self.write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
         self.write_project_stat_to_google_sheet(
             sheet_name=sheet_name,
             projects_stat=projects_stat,
 
         )
-        self.write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
 
 
 google_sheets_api = GoogleSheetsApi()
