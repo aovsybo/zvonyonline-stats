@@ -146,7 +146,6 @@ class GoogleSheetsApi:
             result = []
             total = 0
             project_total = 0
-            print(projects_indexes)
             for i, project in enumerate(projects_indexes):
                 if project == "":
                     result.append(0)
