@@ -72,5 +72,5 @@ def update_reports():
 
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(update_reports, 'interval', seconds=10)
+    scheduler.add_job(update_reports, 'interval', minutes=1)
     scheduler.start()
