@@ -9,6 +9,9 @@ from google.oauth2.credentials import Credentials
 from django.conf import settings
 
 
+START_CELL_NUM = 8
+
+
 class GoogleSheetsApi:
     MAIN_TABLE_RANGE = "A:AC"
     PREV_TABLE_RANGE = "AE1:BG54"
@@ -60,11 +63,10 @@ class GoogleSheetsApi:
         И далее формирует словарь, связывающий имя проекта и номер строки в таблице
         :return: Словарь с соответствием названия проекта номеру его строки в таблице
         """
-        start_index = 8
         table = self.get_table_data(
             settings.GS_TABLE_ID,
             settings.GS_MAIN_SHEET_NAME,
-            f"A{start_index}:B"
+            f"A{START_CELL_NUM}:B"
         )
         project_indexes = []
         for i, line in enumerate(table):
@@ -144,6 +146,7 @@ class GoogleSheetsApi:
             result = []
             total = 0
             project_total = 0
+            print(projects_indexes)
             for i, project in enumerate(projects_indexes):
                 if project == "":
                     result.append(0)
@@ -157,8 +160,8 @@ class GoogleSheetsApi:
                     result.append(projects_stat[project][column])
                     project_total += result[-1]
             cell_num = field_table_shift[column]
-            sheet_range = (f"{self.calc_cell_letter(start_cell_letter, cell_num)}{cell_num + 6}:"
-                           f"{self.calc_cell_letter(start_cell_letter, cell_num)}{cell_num+len(projects_indexes)+6}")
+            sheet_range = (f"{self.calc_cell_letter(start_cell_letter, cell_num)}{START_CELL_NUM}:"
+                           f"{self.calc_cell_letter(start_cell_letter, cell_num)}{START_CELL_NUM+len(projects_indexes)}")
             self.write_to_google_sheet(
                 [[value] for value in result],
                 settings.GS_TABLE_ID,
