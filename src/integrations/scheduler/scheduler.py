@@ -44,7 +44,7 @@ def create_report_for_interval(start_date, end_date, prev_start_date):
 
 
 def get_month_report():
-    today = datetime.today().replace(day=1)
+    today = datetime.today().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     start_date = datetime.timestamp(today)
     end_date = datetime.timestamp(today + relativedelta(months=1))
     prev_start_date = datetime.timestamp(today - relativedelta(months=1))
@@ -52,7 +52,7 @@ def get_month_report():
 
 
 def get_two_weeks_report():
-    today = datetime.today()
+    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
     if today.day > 15:
         two_weeks_ago = today.replace(day=16)
         today = (today + relativedelta(months=1)).replace(day=1)
@@ -72,5 +72,6 @@ def update_reports():
 
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(update_reports, 'interval', minutes=1)
+    # scheduler.add_job(update_reports, 'interval', minutes=1)
+    scheduler.add_job(update_reports, 'interval', seconds=10)
     scheduler.start()
