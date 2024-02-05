@@ -66,12 +66,13 @@ class GoogleSheetsApi:
             settings.GS_MAIN_SHEET_NAME,
             f"A{start_index}:B"
         )
-        project_indexes = dict()
+        project_indexes = []
         for i, line in enumerate(table):
+            project_indexes.append(
+                line[0] if "ИТОГО" in line[0] else settings.GS_TO_SKOROZVON_PROJECT_NAME.get(line[1], "")
+            )
             if len(line) == 1 and line[0] == "ИТОГО ПО ВСЕМ:":
                 break
-            if len(line) == 2:
-                project_indexes[line[1]] = i + start_index
         return project_indexes
 
     def write_to_google_sheet(self, data: list[list], table_link: str, table_sheet_name: str, sheet_range: str):
@@ -139,15 +140,31 @@ class GoogleSheetsApi:
             "leads": 9,
         }
         projects_indexes = self.get_project_indexes()
-        for project_name, project_stat in projects_stat.items():
-            cell_num = projects_indexes[settings.SKOROZVON_PROJECT_TO_GS_NAME[project_name]]
-            for field_name, shift in field_table_shift.items():
-                self.write_to_google_sheet(
-                    [[project_stat[field_name]]],
-                    settings.GS_TABLE_ID,
-                    sheet_name,
-                    f"{self.calc_cell_letter(start_cell_letter, shift)}{cell_num}"
-                )
+        for column in ["contacts", "dialogs", "leads"]:
+            result = []
+            total = 0
+            project_total = 0
+            for i, project in enumerate(projects_indexes):
+                if project == "":
+                    result.append(0)
+                elif project == "ИТОГО:":
+                    result.append(project_total)
+                    total += project_total
+                    project_total = 0
+                elif project == "ИТОГО ПО ВСЕМ:":
+                    result.append(total)
+                else:
+                    result.append(projects_stat[project][column])
+                    project_total += result[-1]
+            cell_num = field_table_shift[column]
+            sheet_range = (f"{self.calc_cell_letter(start_cell_letter, cell_num)}{cell_num + 6}:"
+                           f"{self.calc_cell_letter(start_cell_letter, cell_num)}{cell_num+len(projects_indexes)+6}")
+            self.write_to_google_sheet(
+                [[value] for value in result],
+                settings.GS_TABLE_ID,
+                sheet_name,
+                sheet_range
+            )
 
     def get_date_from_sheet_name(self, sheet_name: str, index: int):
         """
