@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from integrations.models import Leads, Dialogs, QualifiedLeads
+from ..models import Leads, Dialogs, QualifiedLeads
 
 
 class LeadsSerializer(serializers.ModelSerializer):

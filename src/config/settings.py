@@ -32,9 +32,13 @@ SKOROZVON_APPLICATION_ID = os.environ.get("SKOROZVON_APPLICATION_ID")
 SKOROZVON_APPLICATION_KEY = os.environ.get("SKOROZVON_APPLICATION_KEY")
 
 GS_SCOPES = os.environ.get("GS_SCOPES").split(',')
-GS_TABLE_ID = os.environ.get("GS_TABLE_ID")
-GS_MAIN_SHEET_ID = os.environ.get("GS_MAIN_SHEET_ID")
-GS_MAIN_SHEET_NAME = "Шаблон"
+GS_LEADS_TABLE_ID = os.environ.get("GS_LEADS_TABLE_ID")
+GS_LEADS_MAIN_SHEET_ID = os.environ.get("GS_LEADS_MAIN_SHEET_ID")
+GS_LEADS_MAIN_SHEET_NAME = "Шаблон"
+GS_KPI_TABLE_ID = os.environ.get("GS_KPI_TABLE_ID")
+GS_KPI_MAIN_SHEET_ID = os.environ.get("GS_KPI_MAIN_SHEET_ID")
+GS_KPI_MAIN_SHEET_NAME = "Шаблон"
+
 SKOROZVON_SCENARIO_TO_GS_NAME = {
     "ЮСИ. Лидген Авито РНД": "ЮСИ. Лидген с Авито РнД",
     "22.12.23 ЮСИ база Крд": "ЮСИ. ГКЦ РнД",

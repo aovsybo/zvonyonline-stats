@@ -64,8 +64,8 @@ class GoogleSheetsApi:
         :return: Словарь с соответствием названия проекта номеру его строки в таблице
         """
         table = self.get_table_data(
-            settings.GS_TABLE_ID,
-            settings.GS_MAIN_SHEET_NAME,
+            settings.GS_LEADS_TABLE_ID,
+            settings.GS_LEADS_MAIN_SHEET_NAME,
             f"A{START_CELL_NUM}:B"
         )
         project_indexes = []
@@ -125,13 +125,13 @@ class GoogleSheetsApi:
         start_cell_letter = "AE" if is_prev else "A"
         self.write_to_google_sheet(
             [[sheet_name]],
-            settings.GS_TABLE_ID,
+            settings.GS_LEADS_TABLE_ID,
             sheet_name,
             f"{self.calc_cell_letter(start_cell_letter, 2)}1"
         )
         self.write_to_google_sheet(
             [[sheet_name]],
-            settings.GS_TABLE_ID,
+            settings.GS_LEADS_TABLE_ID,
             sheet_name,
             f"{start_cell_letter}32"
         )
@@ -163,7 +163,7 @@ class GoogleSheetsApi:
                            f"{self.calc_cell_letter(start_cell_letter, cell_num)}{START_CELL_NUM+len(projects_indexes)}")
             self.write_to_google_sheet(
                 [[value] for value in result],
-                settings.GS_TABLE_ID,
+                settings.GS_LEADS_TABLE_ID,
                 sheet_name,
                 sheet_range
             )
@@ -200,8 +200,8 @@ class GoogleSheetsApi:
         :param prev_sheet_name: Имя прошлого листа
         :return:
         """
-        previous_table_data = self.get_table_data(settings.GS_TABLE_ID, prev_sheet_name, self.MAIN_TABLE_RANGE)
-        self.write_to_google_sheet(previous_table_data, settings.GS_TABLE_ID, sheet_name, self.PREV_TABLE_RANGE)
+        previous_table_data = self.get_table_data(settings.GS_LEADS_TABLE_ID, prev_sheet_name, self.MAIN_TABLE_RANGE)
+        self.write_to_google_sheet(previous_table_data, settings.GS_LEADS_TABLE_ID, sheet_name, self.PREV_TABLE_RANGE)
 
     def create_sheet_copy(self, copy_table_id: str, copy_sheet_id: int):
         """
@@ -239,14 +239,14 @@ class GoogleSheetsApi:
                 }
             }
         }
-        self._service.spreadsheets().batchUpdate(spreadsheetId=settings.GS_TABLE_ID, body=body).execute()
+        self._service.spreadsheets().batchUpdate(spreadsheetId=settings.GS_LEADS_TABLE_ID, body=body).execute()
 
     def get_sheet_names(self):
         """
         Функция возвращает имена листов в таблице
         :return: Список имен
         """
-        sheet_metadata = self._service.spreadsheets().get(spreadsheetId=settings.GS_TABLE_ID).execute()
+        sheet_metadata = self._service.spreadsheets().get(spreadsheetId=settings.GS_LEADS_TABLE_ID).execute()
         sheets = sheet_metadata.get('sheets', '')
         return [sheet.get("properties", {}).get("title", "") for sheet in sheets]
 
@@ -268,8 +268,8 @@ class GoogleSheetsApi:
         prev_sheet_name = f"{self.str_form_unix(prev_start_date)}-{self.str_form_unix(start_date)}"
         if sheet_name not in self.get_sheet_names():
             sheet_id = self.create_sheet_copy(
-                settings.GS_TABLE_ID,
-                settings.GS_MAIN_SHEET_ID,
+                settings.GS_LEADS_TABLE_ID,
+                settings.GS_LEADS_MAIN_SHEET_ID,
             )
             self.update_sheet_property(sheet_id, "title", sheet_name)
             self.update_sheet_property(sheet_id, "index", "0")
@@ -279,6 +279,17 @@ class GoogleSheetsApi:
             projects_stat=projects_stat,
 
         )
+
+    def get_kpi_user_cells(self):
+        names_row = self.get_table_data(settings.GS_KPI_TABLE_ID, settings.GS_KPI_MAIN_SHEET_NAME, "")[0]
+        return {
+            user_name: self.calc_cell_letter("A", i)
+            for i, user_name in enumerate(names_row)
+            if user_name and user_name != "Дата"
+        }
+
+    def create_kpi_report(self, users_stat: dict):
+        print(users_stat)
 
 
 google_sheets_api = GoogleSheetsApi()

@@ -1,8 +1,5 @@
 import requests
 
-from datetime import datetime, timedelta
-import time
-
 from django.conf import settings
 
 
@@ -53,6 +50,13 @@ class SkorozvonAPI:
             for project in response["data"]
             if project["title"] in settings.SKOROZVON_PROJECT_TO_GS_NAME.keys()
         }
+
+    def get_users(self):
+        return self.get_request(sub_url="users")
+
+    def get_user_id_by_name(self, user_name: str):
+        users_by_name = list(filter(lambda user: user["name"] == user_name, self.get_users()))
+        return users_by_name[0]["id"] if users_by_name else ""
 
 
 skorozvon_api = SkorozvonAPI()

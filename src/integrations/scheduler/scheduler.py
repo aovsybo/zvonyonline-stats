@@ -9,11 +9,13 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 
 def get_db_contacts_count_for_interval(model, start_date, end_date, project_id):
-    return (model.objects
-            .filter(addDate__gte=start_date)
-            .filter(addDate__lt=end_date)
-            .filter(projectId=project_id)
-            .count())
+    return (
+        model.objects
+        .filter(addDate__gte=start_date)
+        .filter(addDate__lt=end_date)
+        .filter(projectId=project_id)
+        .count()
+    )
 
 
 def create_report_for_interval(start_date, end_date, prev_start_date):
@@ -65,9 +67,28 @@ def get_two_weeks_report():
     create_report_for_interval(start_date, end_date, prev_start_date)
 
 
+def get_user_stat(start_time: float, end_time: float, user_id: int):
+    return f"{user_id}:{start_time}:{end_time}"
+
+
+def get_kpi_report():
+    end_time = datetime.today()
+    start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
+    user_names = google_sheets_api.get_kpi_user_cells()
+    users_stat = dict()
+    for user_name in user_names:
+        users_stat[user_name] = get_user_stat(
+            datetime.timestamp(start_time),
+            datetime.timestamp(end_time),
+            skorozvon_api.get_user_id_by_name(user_name)
+        )
+    google_sheets_api.create_kpi_report(users_stat)
+
+
 def update_reports():
     get_two_weeks_report()
     get_month_report()
+    get_kpi_report()
 
 
 def start():
