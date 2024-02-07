@@ -68,13 +68,16 @@ def get_two_weeks_report():
 
 
 def get_user_stat(start_time: float, end_time: float, user_id: int):
-    return f"{user_id}:{start_time}:{end_time}"
+    return {
+        "dialogs": 10,
+        "leads": 3,
+    }
 
 
 def get_kpi_report():
     end_time = datetime.today()
     start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
-    user_names = google_sheets_api.get_kpi_user_cells()
+    user_names = google_sheets_api.get_kpi_user_cells().keys()
     users_stat = dict()
     for user_name in user_names:
         users_stat[user_name] = get_user_stat(
@@ -86,8 +89,8 @@ def get_kpi_report():
 
 
 def update_reports():
-    get_two_weeks_report()
-    get_month_report()
+    # get_two_weeks_report()
+    # get_month_report()
     get_kpi_report()
 
 

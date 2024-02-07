@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+import calendar
+from datetime import datetime, timedelta, date
 import os
 
 from googleapiclient.discovery import build
@@ -16,6 +17,8 @@ class GoogleSheetsApi:
     MAIN_TABLE_RANGE = "A:AC"
     PREV_TABLE_RANGE = "AE1:BG54"
     DATE_FORMAT_FOR_SHEET_NAME = '%d.%m.%y'
+    KPI_TABLE_START_CELL_NUM = 4
+    KPI_TABLE_FINISH_CELL_NUM = 34
     _service = None
 
     def __init__(self):
@@ -220,7 +223,7 @@ class GoogleSheetsApi:
         ).execute()
         return response["sheetId"]
 
-    def update_sheet_property(self, sheet_id: int, field_name: str, field_value: str):
+    def update_sheet_property(self, table_id: str, sheet_id: int, field_name: str, field_value: str):
         """
         Функция изменяет характеристику листа
         :param sheet_id: идентификатор листа
@@ -239,14 +242,14 @@ class GoogleSheetsApi:
                 }
             }
         }
-        self._service.spreadsheets().batchUpdate(spreadsheetId=settings.GS_LEADS_TABLE_ID, body=body).execute()
+        self._service.spreadsheets().batchUpdate(spreadsheetId=table_id, body=body).execute()
 
-    def get_sheet_names(self):
+    def get_sheet_names(self, table_id):
         """
         Функция возвращает имена листов в таблице
         :return: Список имен
         """
-        sheet_metadata = self._service.spreadsheets().get(spreadsheetId=settings.GS_LEADS_TABLE_ID).execute()
+        sheet_metadata = self._service.spreadsheets().get(spreadsheetId=table_id).execute()
         sheets = sheet_metadata.get('sheets', '')
         return [sheet.get("properties", {}).get("title", "") for sheet in sheets]
 
@@ -266,13 +269,13 @@ class GoogleSheetsApi:
         """
         sheet_name = f"{self.str_form_unix(start_date)}-{self.str_form_unix(end_date)}"
         prev_sheet_name = f"{self.str_form_unix(prev_start_date)}-{self.str_form_unix(start_date)}"
-        if sheet_name not in self.get_sheet_names():
+        if sheet_name not in self.get_sheet_names(settings.GS_LEADS_TABLE_ID):
             sheet_id = self.create_sheet_copy(
                 settings.GS_LEADS_TABLE_ID,
                 settings.GS_LEADS_MAIN_SHEET_ID,
             )
-            self.update_sheet_property(sheet_id, "title", sheet_name)
-            self.update_sheet_property(sheet_id, "index", "0")
+            self.update_sheet_property(settings.GS_LEADS_TABLE_ID, sheet_id, "title", sheet_name)
+            self.update_sheet_property(settings.GS_LEADS_TABLE_ID, sheet_id, "index", "0")
             self.write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
         self.write_project_stat_to_google_sheet(
             sheet_name=sheet_name,
@@ -288,8 +291,60 @@ class GoogleSheetsApi:
             if user_name and user_name != "Дата"
         }
 
+    def write_dates_column(self, sheet_name: str):
+        month, year = int(datetime.now().strftime('%m')), int(datetime.now().strftime('%Y'))
+        num_days = calendar.monthrange(year, month)[1]
+        days = [[date(year, month, day).strftime("%Y-%m-%d")] for day in range(1, num_days + 1)]
+        self.write_to_google_sheet(
+            days,
+            settings.GS_KPI_TABLE_ID,
+            sheet_name,
+            f"A{self.KPI_TABLE_START_CELL_NUM}:A{len(days)+self.KPI_TABLE_START_CELL_NUM}"
+        )
+
+    def get_cell_num_by_date(self, sheet_name):
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        return self.get_table_data(
+            settings.GS_KPI_TABLE_ID,
+            sheet_name,
+            f"A{self.KPI_TABLE_START_CELL_NUM}:A{self.KPI_TABLE_FINISH_CELL_NUM}"
+        ).index([current_date]) + self.KPI_TABLE_START_CELL_NUM
+
     def create_kpi_report(self, users_stat: dict):
-        print(users_stat)
+        month_from_num = {
+            1: 'Январь',
+            2: 'Февраль',
+            3: 'Март',
+            4: 'Апрель',
+            5: 'Май',
+            6: 'Июнь',
+            7: 'июль',
+            8: 'Август',
+            9: 'Сентябрь',
+            10: 'Октябрь',
+            11: 'Ноябрь',
+            12: 'Декабрь'
+        }
+        sheet_name = f"{month_from_num[int(datetime.now().strftime('%m'))]} {datetime.now().strftime('%Y')[-2:]}"
+        if sheet_name not in self.get_sheet_names(settings.GS_KPI_TABLE_ID):
+            sheet_id = self.create_sheet_copy(
+                settings.GS_KPI_TABLE_ID,
+                settings.GS_KPI_MAIN_SHEET_ID,
+            )
+            self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "title", sheet_name)
+            self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "index", "0")
+            self.write_dates_column(sheet_name)
+        cell_num = self.get_cell_num_by_date(sheet_name)
+        for user, column_name in self.get_kpi_user_cells().items():
+            field_shifts = {"dialogs": 1, "leads": 3}
+            for field, shift in field_shifts.items():
+                cell_address = f"{self.calc_cell_letter(column_name, shift)}{cell_num}"
+                self.write_to_google_sheet(
+                    [[users_stat[user][field]]],
+                    settings.GS_KPI_TABLE_ID,
+                    sheet_name,
+                    cell_address
+                )
 
 
 google_sheets_api = GoogleSheetsApi()
