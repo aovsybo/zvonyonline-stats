@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 
 
 class CallDataInfo(models.Model):
@@ -69,7 +68,7 @@ class CallDataInfo(models.Model):
     call_result_result_name = models.CharField(max_length=255)
     call_result_comment = models.TextField(null=True)
 
-    save_date = models.DateTimeField(default=timezone.localtime(timezone.now()))
+    save_date = models.DateTimeField(auto_now_add=True)
 
 
 class Leads(models.Model):
