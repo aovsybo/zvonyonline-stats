@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class CallDataInfo(models.Model):
@@ -68,7 +69,7 @@ class CallDataInfo(models.Model):
     call_result_result_name = models.CharField(max_length=255)
     call_result_comment = models.TextField(null=True)
 
-    save_date = models.DateTimeField(auto_now_add=True)
+    save_date = models.DateTimeField(default=timezone.localtime(timezone.now()))
 
 
 class Leads(models.Model):
@@ -83,31 +84,3 @@ class Leads(models.Model):
     class Meta:
         managed = False
         db_table = 'Leads'
-
-
-# class QualifiedLeads(models.Model):
-#     id = models.IntegerField(primary_key=True, auto_created=True)
-#     name = models.CharField(max_length=255, blank=True)
-#     phoneNumber = models.CharField(max_length=255, blank=True)
-#     site = models.CharField(max_length=255, blank=True)
-#     comment = models.CharField(max_length=255, blank=True)
-#     projectId = models.CharField(max_length=100, blank=True)
-#     addDate = models.IntegerField(blank=True)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'QualifiedLeads'
-#
-#
-# class Dialogs(models.Model):
-#     id = models.IntegerField(primary_key=True, auto_created=True)
-#     name = models.CharField(max_length=255, blank=True)
-#     phoneNumber = models.CharField(max_length=255, blank=True)
-#     site = models.CharField(max_length=255, blank=True)
-#     comment = models.CharField(max_length=255, blank=True)
-#     projectId = models.CharField(max_length=100, blank=True)
-#     addDate = models.IntegerField(blank=True)
-#
-#     class Meta:
-#         managed = False
-#         db_table = 'Dialogs'

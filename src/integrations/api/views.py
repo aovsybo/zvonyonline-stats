@@ -2,12 +2,10 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-# from .serializers import LeadsSerializer
 from .serializers import CallDataInfoSerializer
 
 
 class WriteDataToGoogleSheet(CreateAPIView):
-    # serializer_class = LeadsSerializer
     serializer_class = CallDataInfoSerializer
 
     def post(self, request, *args, **kwargs):

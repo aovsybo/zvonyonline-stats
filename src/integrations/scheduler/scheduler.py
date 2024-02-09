@@ -3,9 +3,7 @@ from dateutil.relativedelta import relativedelta
 
 from django.conf import settings
 
-# from ..models import Leads, QualifiedLeads, Dialogs
 from ..models import CallDataInfo, Leads
-from ..api.serializers import CallDataInfoSerializer
 from ..services.skorozvon import skorozvon_api
 from ..services.google_sheets import google_sheets_api
 
@@ -86,7 +84,6 @@ def get_two_weeks_report():
 
 
 def get_user_stat(start_date: datetime, end_date: datetime, user_id: int):
-    # TODO: TimeZone
     return {
         "dialogs": CallDataInfo.objects
             .filter(call_user_id=user_id)
