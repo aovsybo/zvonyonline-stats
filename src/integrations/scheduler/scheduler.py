@@ -10,6 +10,9 @@ from ..services.google_sheets import google_sheets_api
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
+LOCAL_TZ = 3
+
+
 def get_db_contacts_count_for_interval(start_date, end_date, project_id):
     return (
         Leads.objects
@@ -62,7 +65,7 @@ def create_report_for_interval(start_date, end_date, prev_start_date):
 
 
 def get_month_report():
-    today = datetime.today().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    today = datetime.today().replace(day=1, hour=LOCAL_TZ, minute=0, second=0, microsecond=0)
     start_date = datetime.timestamp(today)
     end_date = datetime.timestamp(today + relativedelta(months=1))
     prev_start_date = datetime.timestamp(today - relativedelta(months=1))
@@ -70,7 +73,7 @@ def get_month_report():
 
 
 def get_two_weeks_report():
-    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+    today = datetime.today().replace(hour=LOCAL_TZ, minute=0, second=0, microsecond=0)
     if today.day > 15:
         two_weeks_ago = today.replace(day=16)
         today = (today + relativedelta(months=1)).replace(day=1)
