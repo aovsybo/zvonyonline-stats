@@ -131,7 +131,7 @@ def get_intervals(count: int):
     intervals = []
     for i in range(count):
         intervals.append(",".join(
-            [str(2 * j * count + i) for j in range(30 // count)]
+            [str(2 * (j * count + i)) for j in range(30 // count)]
         ))
     return intervals
 
