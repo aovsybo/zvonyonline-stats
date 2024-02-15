@@ -26,17 +26,23 @@ def get_db_contacts_count_for_interval(start_date, end_date, project_id):
 def get_db_dialogs_count_for_interval(start_date, end_date, project_id, only_leads=False):
     start_date = datetime.fromtimestamp(start_date)
     end_date = datetime.fromtimestamp(end_date)
-    dialogs = (
-        CallDataInfo.objects
-        .filter(save_date__gte=start_date)
-        .filter(save_date__lt=end_date)
-        .filter(call_call_project_id=project_id)
-        .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
-
-    )
     if only_leads:
-        dialogs.filter(call_result_result_id__in=settings.SCOROZVON_WORKING_RESULT_IDS)
-    return dialogs.count()
+        return (
+            CallDataInfo.objects.filter(save_date__gte=start_date)
+            .filter(save_date__lt=end_date)
+            .filter(call_call_project_id=project_id)
+            .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
+            .filter(call_result_result_id__in=settings.SCOROZVON_WORKING_RESULT_IDS)
+            .count()
+        )
+    else:
+        return (
+            CallDataInfo.objects.filter(save_date__gte=start_date)
+            .filter(save_date__lt=end_date)
+            .filter(call_call_project_id=project_id)
+            .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
+            .count()
+        )
 
 
 def create_report_for_interval(start_date, end_date, prev_start_date):
