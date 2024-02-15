@@ -23,28 +23,36 @@ class SkorozvonAPI:
         return f"Bearer {response['access_token']}"
 
     def get_request(self, sub_url: str, params: dict = None):
-        return requests.get(
+        response = requests.get(
             url=f"{self.API_URL}{sub_url}",
             headers={"Authorization": self._token},
             params=params
-        ).json()
-
-    def get_scenarios_ids(self):
-        response = self.get_request(
-            sub_url="scenarios",
-            params={"length": 100},
         )
-        return {
-            project["name"]: project["id"]
-            for project in response["data"]
-            if project["name"] in settings.SKOROZVON_SCENARIO_TO_GS_NAME.keys()
-        }
+        try:
+            return response.json()
+        except Exception:
+            return None
+
+    # def get_scenarios_ids(self):
+    #     response = self.get_request(
+    #         sub_url="scenarios",
+    #         params={"length": 100},
+    #     )
+    #     if not response:
+    #         return None
+    #     return {
+    #         project["name"]: project["id"]
+    #         for project in response["data"]
+    #         if project["name"] in settings.SKOROZVON_SCENARIO_TO_GS_NAME.keys()
+    #     }
 
     def get_projects_ids(self):
         response = self.get_request(
             sub_url="call_projects",
             params={"length": 100},
         )
+        if not response:
+            return None
         return {
             project["title"]: project["id"]
             for project in response["data"]
@@ -52,11 +60,17 @@ class SkorozvonAPI:
         }
 
     def get_users(self):
-        return self.get_request(sub_url="users")
+        users = self.get_request(sub_url="users")
+        if not users:
+            return None
+        return {user["name"]: user["id"] for user in users}
 
-    def get_user_id_by_name(self, user_name: str):
-        users_by_name = list(filter(lambda user: user["name"] == user_name, self.get_users()))
-        return users_by_name[0]["id"] if users_by_name else ""
+    # def get_user_id_by_name(self, user_name: str):
+    #     users = self.get_users()
+    #     if not users:
+    #         return None
+    #     users_by_name = list(filter(lambda user: user["name"] == user_name, users))
+    #     return users_by_name[0]["id"] if users_by_name else ""
 
 
 skorozvon_api = SkorozvonAPI()

@@ -41,6 +41,8 @@ def get_db_dialogs_count_for_interval(start_date, end_date, project_id, only_lea
 
 def create_report_for_interval(start_date, end_date, prev_start_date):
     projects_ids = skorozvon_api.get_projects_ids()
+    if not projects_ids:
+        return
     projects_stat = dict()
     for project_name, project_id in projects_ids.items():
         projects_stat[project_name] = {
@@ -106,12 +108,15 @@ def get_kpi_report():
     end_time = datetime.now()
     start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
     user_names = google_sheets_api.get_kpi_user_cells().keys()
+    users = skorozvon_api.get_users()
+    if not users:
+        return
     users_stat = dict()
     for user_name in user_names:
         users_stat[user_name] = get_user_stat(
             start_time,
             end_time,
-            skorozvon_api.get_user_id_by_name(user_name)
+            users[user_name]
         )
     google_sheets_api.create_kpi_report(users_stat)
 
