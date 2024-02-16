@@ -9,9 +9,10 @@ class WriteDataToGoogleSheet(CreateAPIView):
     serializer_class = CallDataInfoSerializer
 
     def post(self, request, *args, **kwargs):
+        # request.content как логировать
         serializer = self.serializer_class(data=self.flatten_data(request.data))
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
+        if serializer.is_valid():
+            serializer.save()
         return Response(status=status.HTTP_201_CREATED)
 
     @staticmethod
