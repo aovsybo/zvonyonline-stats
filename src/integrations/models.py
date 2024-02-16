@@ -66,7 +66,7 @@ class CallDataInfo(models.Model):
 
     call_result_result_id = models.CharField(max_length=255, null=True, blank=True)
     call_result_result_name = models.CharField(max_length=255, null=True, blank=True)
-    call_result_comment = models.TextField(null=True)
+    call_result_comment = models.TextField(null=True, blank=True)
 
     save_date = models.DateTimeField(auto_now_add=True)
 
