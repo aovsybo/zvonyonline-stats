@@ -1,3 +1,6 @@
+import json
+import logging
+
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -5,11 +8,14 @@ from rest_framework import status
 from .serializers import CallDataInfoSerializer
 
 
+logger = logging.getLogger(__name__)
+
+
 class WriteDataToGoogleSheet(CreateAPIView):
     serializer_class = CallDataInfoSerializer
 
     def post(self, request, *args, **kwargs):
-        # request.content как логировать
+        logger.info(json.dumps(request.data))
         serializer = self.serializer_class(data=self.flatten_data(request.data))
         if serializer.is_valid():
             serializer.save()

@@ -101,6 +101,25 @@ SCOROZVON_WORKING_SCENARIO_IDS = [
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": BASE_DIR / "WriteDataToGoogleSheet.log"
+        },
+    },
+    "loggers": {
+        "integrations": {
+            "handlers": ["file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    }
+}
+
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(',')
 
 APPSCHEDULER_DATETIME_FORMAT = 'N j, Y, f:s a'

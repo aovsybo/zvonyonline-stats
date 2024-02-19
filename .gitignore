@@ -3,3 +3,4 @@
 .venv/
 credentials.json
 token.json
+WriteDataToGoogleSheet.log
