@@ -1,6 +1,10 @@
 from django.db import models
 
 
+class UsersKPI(models.Model):
+    name = models.CharField(max_length=255)
+
+
 class CallDataInfo(models.Model):
     type = models.CharField(max_length=255, null=True, blank=True)
 

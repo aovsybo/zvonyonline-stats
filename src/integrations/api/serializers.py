@@ -1,7 +1,12 @@
 from rest_framework import serializers
 
-# from ..models import Leads, Dialogs, QualifiedLeads
-from ..models import CallDataInfo, Leads
+from ..models import CallDataInfo, Leads, UsersKPI
+
+
+class UsersKPISerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UsersKPI
+        fields = '__all__'
 
 
 class CallDataInfoSerializer(serializers.ModelSerializer):

@@ -3,7 +3,8 @@ from dateutil.relativedelta import relativedelta
 
 from django.conf import settings
 
-from ..models import CallDataInfo, Leads
+from ..api.serializers import UsersKPISerializer
+from ..models import CallDataInfo, Leads, UsersKPI
 from ..services.skorozvon import skorozvon_api
 from ..services.google_sheets import google_sheets_api
 
@@ -111,11 +112,18 @@ def get_user_stat(start_date: datetime, end_date: datetime, user_id: int):
 
 def get_relevant_users():
     relevant_users = google_sheets_api.get_kpi_users_list()
-    return relevant_users
-    # actualize db
-    # if new - add column
-    # if deleted - dont update his data
-    # return db list
+    for user in relevant_users:
+        data = {"name": user}
+        if not UsersKPI.objects.filter(**data).exists():
+            serializer = UsersKPISerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                # add_column
+    db_users = UsersKPISerializer(UsersKPI.objects.all(), many=True).data
+    for user in db_users:
+        if user["name"] not in relevant_users:
+            UsersKPI.objects.filter(id=user["id"]).delete()
+    return [user["name"] for user in UsersKPISerializer(UsersKPI.objects.all(), many=True).data]
 
 
 def get_kpi_report():

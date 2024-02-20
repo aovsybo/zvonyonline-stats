@@ -315,7 +315,7 @@ class GoogleSheetsApi:
             settings.GS_KPI_TABLE_ID,
             settings.GS_KPI_USERS_SHEET_NAME,
             f"A:A"
-        )[1:]]
+        )[1:] if user]
 
     def create_kpi_report(self, users_stat: dict):
         month_from_num = {
