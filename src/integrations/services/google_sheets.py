@@ -310,6 +310,13 @@ class GoogleSheetsApi:
             f"A{self.KPI_TABLE_START_CELL_NUM}:A{self.KPI_TABLE_FINISH_CELL_NUM}"
         ).index([current_date]) + self.KPI_TABLE_START_CELL_NUM
 
+    def get_kpi_users_list(self):
+        return [user[0] for user in self.get_table_data(
+            settings.GS_KPI_TABLE_ID,
+            settings.GS_KPI_USERS_SHEET_NAME,
+            f"A:A"
+        )[1:]]
+
     def create_kpi_report(self, users_stat: dict):
         month_from_num = {
             1: 'Январь',

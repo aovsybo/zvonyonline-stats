@@ -1,7 +1,7 @@
 import json
 import logging
 
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -9,6 +9,14 @@ from .serializers import CallDataInfoSerializer
 
 
 logger = logging.getLogger(__name__)
+
+
+class Test(ListAPIView):
+    def get(self, request, *args, **kwargs):
+        data = dict()
+        from ..scheduler.scheduler import get_relevant_users
+        data['users'] = get_relevant_users()
+        return Response(data=data, status=status.HTTP_201_CREATED)
 
 
 class WriteDataToGoogleSheet(CreateAPIView):

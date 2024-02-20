@@ -9,7 +9,6 @@ from ..services.google_sheets import google_sheets_api
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-
 LOCAL_TZ = 3
 
 
@@ -97,22 +96,32 @@ def get_two_weeks_report():
 def get_user_stat(start_date: datetime, end_date: datetime, user_id: int):
     return {
         "dialogs": CallDataInfo.objects
-            .filter(call_user_id=user_id)
-            .filter(save_date__gte=start_date)
-            .filter(save_date__lt=end_date)
-            .filter(call_duration__gte=15).count(),
+        .filter(call_user_id=user_id)
+        .filter(save_date__gte=start_date)
+        .filter(save_date__lt=end_date)
+        .filter(call_duration__gte=15).count(),
         "leads": CallDataInfo.objects
-            .filter(call_user_id=user_id)
-            .filter(save_date__gte=start_date)
-            .filter(save_date__lt=end_date)
-            .filter(call_duration__gte=15)
-            .filter(call_result_result_id__in=settings.SCOROZVON_WORKING_RESULT_IDS).count()
+        .filter(call_user_id=user_id)
+        .filter(save_date__gte=start_date)
+        .filter(save_date__lt=end_date)
+        .filter(call_duration__gte=15)
+        .filter(call_result_result_id__in=settings.SCOROZVON_WORKING_RESULT_IDS).count()
     }
+
+
+def get_relevant_users():
+    relevant_users = google_sheets_api.get_kpi_users_list()
+    return relevant_users
+    # actualize db
+    # if new - add column
+    # if deleted - dont update his data
+    # return db list
 
 
 def get_kpi_report():
     end_time = datetime.now()
     start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
+    user_names = get_relevant_users()
     user_names = google_sheets_api.get_kpi_user_cells().keys()
     users = skorozvon_api.get_users()
     if not users:
