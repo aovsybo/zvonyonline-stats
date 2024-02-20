@@ -10,15 +10,27 @@ from google.oauth2.credentials import Credentials
 from django.conf import settings
 
 
-START_CELL_NUM = 8
-
-
 class GoogleSheetsApi:
+    START_CELL_NUM = 8
     MAIN_TABLE_RANGE = "A:AC"
     PREV_TABLE_RANGE = "AE1:BG54"
     DATE_FORMAT_FOR_SHEET_NAME = '%d.%m.%y'
     KPI_TABLE_START_CELL_NUM = 4
     KPI_TABLE_FINISH_CELL_NUM = 34
+    MONTH_FROM_NUM = {
+        1: 'Январь',
+        2: 'Февраль',
+        3: 'Март',
+        4: 'Апрель',
+        5: 'Май',
+        6: 'Июнь',
+        7: 'июль',
+        8: 'Август',
+        9: 'Сентябрь',
+        10: 'Октябрь',
+        11: 'Ноябрь',
+        12: 'Декабрь'
+    }
     _service = None
 
     def __init__(self):
@@ -69,7 +81,7 @@ class GoogleSheetsApi:
         table = self.get_table_data(
             settings.GS_LEADS_TABLE_ID,
             settings.GS_LEADS_MAIN_SHEET_NAME,
-            f"A{START_CELL_NUM}:B"
+            f"A{self.START_CELL_NUM}:B"
         )
         project_indexes = []
         for i, line in enumerate(table):
@@ -162,8 +174,8 @@ class GoogleSheetsApi:
                     result.append(projects_stat[project][column])
                     project_total += result[-1]
             cell_num = field_table_shift[column]
-            sheet_range = (f"{self.calc_cell_letter(start_cell_letter, cell_num)}{START_CELL_NUM}:"
-                           f"{self.calc_cell_letter(start_cell_letter, cell_num)}{START_CELL_NUM+len(projects_indexes)}")
+            sheet_range = (f"{self.calc_cell_letter(start_cell_letter, cell_num)}{self.START_CELL_NUM}:"
+                           f"{self.calc_cell_letter(start_cell_letter, cell_num)}{self.START_CELL_NUM+len(projects_indexes)}")
             self.write_to_google_sheet(
                 [[value] for value in result],
                 settings.GS_LEADS_TABLE_ID,
@@ -188,7 +200,7 @@ class GoogleSheetsApi:
         :return: Название предыдущего листа
         """
         start_date = self.get_date_from_sheet_name(current_sheet_name, 0)
-        sheet_names = self.get_sheet_names()
+        sheet_names = self.get_sheet_names(settings.GS_LEADS_TABLE_ID)
         validated_sheet_names = list(filter(lambda sheet_name: "-" in sheet_name, sheet_names))
         prev_sheet_name = min(validated_sheet_names, key=lambda sheet_name: abs(
             start_date - self.get_date_from_sheet_name(sheet_name, 1)
@@ -256,7 +268,16 @@ class GoogleSheetsApi:
     def str_form_unix(self, unix_time: int):
         return datetime.utcfromtimestamp(unix_time).strftime(self.DATE_FORMAT_FOR_SHEET_NAME)
 
-    def create_report_sheet(self, projects_stat: dict, start_date: int, end_date: int, prev_start_date: int):
+    def create_report_sheet(self, sheet_name, prev_sheet_name):
+        sheet_id = self.create_sheet_copy(
+            settings.GS_LEADS_TABLE_ID,
+            settings.GS_LEADS_MAIN_SHEET_ID,
+        )
+        self.update_sheet_property(settings.GS_LEADS_TABLE_ID, sheet_id, "title", sheet_name)
+        self.update_sheet_property(settings.GS_LEADS_TABLE_ID, sheet_id, "index", "0")
+        self.write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
+
+    def create_report(self, projects_stat: dict, start_date: int, end_date: int, prev_start_date: int):
         """
         Функция формирует отчет по статистике в таблицу.
         Создается копия листа-шаблона, переименовывается и устанавливается первым при отображении в таблице
@@ -270,13 +291,7 @@ class GoogleSheetsApi:
         sheet_name = f"{self.str_form_unix(start_date)}-{self.str_form_unix(end_date)}"
         prev_sheet_name = f"{self.str_form_unix(prev_start_date)}-{self.str_form_unix(start_date)}"
         if sheet_name not in self.get_sheet_names(settings.GS_LEADS_TABLE_ID):
-            sheet_id = self.create_sheet_copy(
-                settings.GS_LEADS_TABLE_ID,
-                settings.GS_LEADS_MAIN_SHEET_ID,
-            )
-            self.update_sheet_property(settings.GS_LEADS_TABLE_ID, sheet_id, "title", sheet_name)
-            self.update_sheet_property(settings.GS_LEADS_TABLE_ID, sheet_id, "index", "0")
-            self.write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
+            self.create_report_sheet(sheet_name, prev_sheet_name)
         self.write_project_stat_to_google_sheet(
             sheet_name=sheet_name,
             projects_stat=projects_stat,
@@ -292,6 +307,12 @@ class GoogleSheetsApi:
         }
 
     def write_dates_column(self, sheet_name: str):
+        self.write_to_google_sheet(
+            [["Дата"]],
+            settings.GS_KPI_TABLE_ID,
+            sheet_name,
+            f"A1:A{self.KPI_TABLE_START_CELL_NUM - 1}"
+        )
         month, year = int(datetime.now().strftime('%m')), int(datetime.now().strftime('%Y'))
         num_days = calendar.monthrange(year, month)[1]
         days = [[date(year, month, day).strftime("%Y-%m-%d")] for day in range(1, num_days + 1)]
@@ -317,30 +338,63 @@ class GoogleSheetsApi:
             f"A:A"
         )[1:] if user]
 
-    def create_kpi_report(self, users_stat: dict):
-        month_from_num = {
-            1: 'Январь',
-            2: 'Февраль',
-            3: 'Март',
-            4: 'Апрель',
-            5: 'Май',
-            6: 'Июнь',
-            7: 'июль',
-            8: 'Август',
-            9: 'Сентябрь',
-            10: 'Октябрь',
-            11: 'Ноябрь',
-            12: 'Декабрь'
+    def add_kpi_column(self, sheet_name, user_name, index):
+        data = self.get_table_data(
+            settings.GS_KPI_TABLE_ID,
+            settings.GS_KPI_USERS_SHEET_TEMPLATE_NAME,
+            "B1:E37"
+        )
+        data[0].append(user_name)
+        self.write_to_google_sheet(
+            data,
+            settings.GS_KPI_TABLE_ID,
+            sheet_name,
+            f"{self.calc_cell_letter('B', index * 4)}:{self.calc_cell_letter('B', index * 4 + 3)}"
+        )
+        # TODO: merge cells
+        # TODO: borders
+        # TODO: size by days
+
+
+    def _crate_kpi_sheet(self, users, sheet_name):
+        sheet_id = self.create_sheet(
+            table_id=settings.GS_KPI_TABLE_ID,
+            sheet_name=sheet_name
+        )
+        self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "index", "0")
+        self.write_dates_column(sheet_name)
+        for i, user in enumerate(users):
+            self.add_kpi_column(sheet_name, user, i)
+
+    def create_sheet(self, sheet_name, table_id):
+        body = {
+            'requests': [{
+                'addSheet': {
+                    'properties': {
+                        'title': sheet_name,
+                    }
+                }
+            }]
         }
-        sheet_name = f"{month_from_num[int(datetime.now().strftime('%m'))]} {datetime.now().strftime('%Y')[-2:]}"
+        response = self._service.spreadsheets().batchUpdate(
+            spreadsheetId=table_id,
+            body=body
+        ).execute()
+        return response["replies"][0]["addSheet"]["properties"]["sheetId"]
+
+    def crate_kpi_sheet(self, users, sheet_name):
+        sheet_id = self.create_sheet_copy(
+            settings.GS_KPI_TABLE_ID,
+            settings.GS_KPI_MAIN_SHEET_ID,
+        )
+        self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "title", sheet_name)
+        self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "index", "0")
+        self.write_dates_column(sheet_name)
+
+    def create_kpi_report(self, users_stat: dict):
+        sheet_name = f"{self.MONTH_FROM_NUM[int(datetime.now().strftime('%m'))]} {datetime.now().strftime('%Y')[-2:]}"
         if sheet_name not in self.get_sheet_names(settings.GS_KPI_TABLE_ID):
-            sheet_id = self.create_sheet_copy(
-                settings.GS_KPI_TABLE_ID,
-                settings.GS_KPI_MAIN_SHEET_ID,
-            )
-            self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "title", sheet_name)
-            self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "index", "0")
-            self.write_dates_column(sheet_name)
+            self.crate_kpi_sheet(users_stat.keys(), sheet_name)
         cell_num = self.get_cell_num_by_date(sheet_name)
         for user, column_name in self.get_kpi_user_cells().items():
             field_shifts = {"dialogs": 1, "leads": 3}

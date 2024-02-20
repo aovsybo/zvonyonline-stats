@@ -10,6 +10,7 @@ from ..services.google_sheets import google_sheets_api
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
+
 LOCAL_TZ = 3
 
 
@@ -40,6 +41,7 @@ def get_db_dialogs_count_for_interval(start_date, end_date, project_id, only_lea
             CallDataInfo.objects.filter(save_date__gte=start_date)
             .filter(save_date__lt=end_date)
             .filter(call_call_project_id=project_id)
+            # .filter(call_result_result_name__in=settings.SCOROZVON_WORKING_DIALOG_RESULT_NAMES)
             .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
             .count()
         )
@@ -69,7 +71,7 @@ def create_report_for_interval(start_date, end_date, prev_start_date):
                 only_leads=True,
             ),
         }
-    google_sheets_api.create_report_sheet(projects_stat, start_date, end_date, prev_start_date)
+    google_sheets_api.create_report(projects_stat, start_date, end_date, prev_start_date)
 
 
 def get_month_report():
@@ -118,7 +120,7 @@ def get_relevant_users():
             serializer = UsersKPISerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                # add_column
+                google_sheets_api.add_kpi_column(user)
     db_users = UsersKPISerializer(UsersKPI.objects.all(), many=True).data
     for user in db_users:
         if user["name"] not in relevant_users:
@@ -144,12 +146,6 @@ def get_kpi_report():
     google_sheets_api.create_kpi_report(users_stat)
 
 
-def update_reports():
-    get_two_weeks_report()
-    get_month_report()
-    get_kpi_report()
-
-
 def get_intervals(count: int):
     intervals = []
     for i in range(count):
@@ -160,13 +156,14 @@ def get_intervals(count: int):
 
 
 def start():
-    scheduler = BackgroundScheduler()
-    jobs = [
-        get_two_weeks_report,
-        get_month_report,
-        get_kpi_report
-    ]
-    intervals = get_intervals(len(jobs))
-    for i, job in enumerate(jobs):
-        scheduler.add_job(job, 'cron', minute=intervals[i])
-    scheduler.start()
+    # scheduler = BackgroundScheduler()
+    # jobs = [
+    #     get_two_weeks_report,
+    #     get_month_report,
+    #     get_kpi_report
+    # ]
+    # intervals = get_intervals(len(jobs))
+    # for i, job in enumerate(jobs):
+    #     scheduler.add_job(job, 'cron', minute=intervals[i])
+    # scheduler.start()
+    pass

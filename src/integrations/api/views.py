@@ -14,8 +14,11 @@ logger = logging.getLogger(__name__)
 class Test(ListAPIView):
     def get(self, request, *args, **kwargs):
         data = dict()
+        from ..services.google_sheets import google_sheets_api
         from ..scheduler.scheduler import get_relevant_users
-        data['users'] = get_relevant_users()
+        user_names = get_relevant_users()
+        import datetime
+        data["asd"] = google_sheets_api._crate_kpi_sheet(user_names, str(datetime.datetime.timestamp(datetime.datetime.now())))
         return Response(data=data, status=status.HTTP_201_CREATED)
 
 

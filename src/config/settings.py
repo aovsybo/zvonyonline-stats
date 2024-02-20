@@ -39,6 +39,7 @@ GS_KPI_TABLE_ID = os.environ.get("GS_KPI_TABLE_ID")
 GS_KPI_MAIN_SHEET_ID = os.environ.get("GS_KPI_MAIN_SHEET_ID")
 GS_KPI_MAIN_SHEET_NAME = "Шаблон"
 GS_KPI_USERS_SHEET_NAME = "Сотрудники"
+GS_KPI_USERS_SHEET_TEMPLATE_NAME = "Шаблон по сотруднику"
 
 SKOROZVON_SCENARIO_TO_GS_NAME = {
     "ЮСИ. Лидген Авито РНД": "ЮСИ. Лидген с Авито РнД",
@@ -99,6 +100,12 @@ SCOROZVON_WORKING_SCENARIO_IDS = [
     "50000013363",
     "50000014134",
 ]
+SCOROZVON_WORKING_DIALOG_RESULT_NAMES = [
+    "Лид",
+    "Успех",
+    "Отказ",
+]
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
