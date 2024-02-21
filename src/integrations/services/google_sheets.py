@@ -120,9 +120,9 @@ class GoogleSheetsApi:
         new_letter = chr(ord(start_cell[-1]) + shift)
         if new_letter > "Z":
             if len(start_cell) == 1:
-                return f"A{chr(ord(new_letter)-26)}"
+                return f"A{chr(ord(new_letter) - 26)}"
             else:
-                return f"{chr(ord(start_cell[0])+1)}{chr(ord(new_letter)-26)}"
+                return f"{chr(ord(start_cell[0]) + 1)}{chr(ord(new_letter) - 26)}"
         else:
             return f"{start_cell[:-1]}{new_letter}"
 
@@ -175,7 +175,7 @@ class GoogleSheetsApi:
                     project_total += result[-1]
             cell_num = field_table_shift[column]
             sheet_range = (f"{self.calc_cell_letter(start_cell_letter, cell_num)}{self.START_CELL_NUM}:"
-                           f"{self.calc_cell_letter(start_cell_letter, cell_num)}{self.START_CELL_NUM+len(projects_indexes)}")
+                           f"{self.calc_cell_letter(start_cell_letter, cell_num)}{self.START_CELL_NUM + len(projects_indexes)}")
             self.write_to_google_sheet(
                 [[value] for value in result],
                 settings.GS_LEADS_TABLE_ID,
@@ -244,15 +244,15 @@ class GoogleSheetsApi:
         """
         body = {
             'requests':
-            {
-                "updateSheetProperties": {
-                    "properties": {
-                        "sheetId": sheet_id,
-                        field_name: field_value,
-                    },
-                    "fields": field_name,
+                {
+                    "updateSheetProperties": {
+                        "properties": {
+                            "sheetId": sheet_id,
+                            field_name: field_value,
+                        },
+                        "fields": field_name,
+                    }
                 }
-            }
         }
         self._service.spreadsheets().batchUpdate(spreadsheetId=table_id, body=body).execute()
 
@@ -320,8 +320,9 @@ class GoogleSheetsApi:
             days,
             settings.GS_KPI_TABLE_ID,
             sheet_name,
-            f"A{self.KPI_TABLE_START_CELL_NUM}:A{len(days)+self.KPI_TABLE_START_CELL_NUM}"
+            f"A{self.KPI_TABLE_START_CELL_NUM}:A{len(days) + self.KPI_TABLE_START_CELL_NUM}"
         )
+        return len(days)
 
     def get_cell_num_by_date(self, sheet_name):
         current_date = datetime.now().strftime("%Y-%m-%d")
@@ -338,23 +339,88 @@ class GoogleSheetsApi:
             f"A:A"
         )[1:] if user]
 
-    def add_kpi_column(self, sheet_name, user_name, index):
+    @staticmethod
+    def get_merge_data(sheet_id, start_row, end_row, start_col, end_col):
+        return {
+            "mergeCells": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "startRowIndex": start_row,
+                    "endRowIndex": end_row,
+                    "startColumnIndex": start_col,
+                    "endColumnIndex": end_col
+                },
+                "mergeType": "MERGE_ALL"
+            }
+        },
+
+    def merge_cells(self, table_id, merge_data):
+        return self._service.spreadsheets().batchUpdate(
+            spreadsheetId=table_id,
+            body={"requests": merge_data}
+        ).execute()
+
+    def add_kpi_column(self, sheet_name, user_name, index, days_amount):
         data = self.get_table_data(
             settings.GS_KPI_TABLE_ID,
             settings.GS_KPI_USERS_SHEET_TEMPLATE_NAME,
-            "B1:E37"
+            "B1:E6"
         )
         data[0].append(user_name)
+        start_letter = self.calc_cell_letter('B', index * 4)
+        for i in range(len(data[-3])):
+            current_letter = self.calc_cell_letter(start_letter, i)
+            data[-2][i] = (f'=СУММ({current_letter}{self.KPI_TABLE_START_CELL_NUM}'
+                           f':{current_letter}{self.KPI_TABLE_START_CELL_NUM+days_amount - 1})')
+        for i in range(2):
+            current_letter = self.calc_cell_letter(start_letter, i * 2 + 1)
+            data[-1][i * 2 + 1] = (
+                f'={current_letter}{self.KPI_TABLE_START_CELL_NUM + days_amount}-'
+                f'{self.calc_cell_letter(current_letter, -1)}{self.KPI_TABLE_START_CELL_NUM + days_amount}'
+            )
+        data[-1][2] = (
+                f'={self.calc_cell_letter(start_letter, 3)}{self.KPI_TABLE_START_CELL_NUM + days_amount + 1}/'
+                f'{self.calc_cell_letter(start_letter, 1)}{self.KPI_TABLE_START_CELL_NUM + days_amount + 1}'
+        )
+        for day in range(days_amount):
+            data.insert(3, [])
         self.write_to_google_sheet(
             data,
             settings.GS_KPI_TABLE_ID,
             sheet_name,
-            f"{self.calc_cell_letter('B', index * 4)}:{self.calc_cell_letter('B', index * 4 + 3)}"
+            f"{start_letter}:{self.calc_cell_letter(start_letter, 3)}"
         )
-        # TODO: merge cells
-        # TODO: borders
-        # TODO: size by days
+        # TODO: + links + Премия
 
+    def add_borders(self, table_id, sheet_id, start_row, end_row, start_col, end_col):
+        sides = ["top", "bottom", "left", "right", "innerHorizontal", "innerVertical"]
+        body = {
+            "requests": [
+                {
+                    "updateBorders": {
+                        "range": {
+                            "sheetId": sheet_id,
+                            "startRowIndex": start_row,
+                            "endRowIndex": end_row,
+                            "startColumnIndex": start_col,
+                            "endColumnIndex": end_col
+                        },
+                    }
+                }
+            ]
+        }
+        for side in sides:
+            body["requests"][0]["updateBorders"][side] = {
+                "style": "SOLID",
+                "width": 1,
+                # "color": {
+                #     "blue": 1.0
+                # },
+            }
+        return self._service.spreadsheets().batchUpdate(
+            spreadsheetId=table_id,
+            body=body
+        ).execute()
 
     def _crate_kpi_sheet(self, users, sheet_name):
         sheet_id = self.create_sheet(
@@ -362,9 +428,28 @@ class GoogleSheetsApi:
             sheet_name=sheet_name
         )
         self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "index", "0")
-        self.write_dates_column(sheet_name)
+        merge_data = []
+        days_amount = self.write_dates_column(sheet_name)
+        # merge data field
+        merge_data.append(
+            self.get_merge_data(sheet_id, 0, 3, 0, 1)
+        )
         for i, user in enumerate(users):
-            self.add_kpi_column(sheet_name, user, i)
+            self.add_kpi_column(sheet_name, user, i, days_amount)
+            # merge name
+            merge_data.append(
+                self.get_merge_data(sheet_id, 0, 1, i * 4 + 1, i * 4 + 5)
+            )
+            # merge outcallings
+            merge_data.append(
+                self.get_merge_data(sheet_id, 1, 2, i * 4 + 1, i * 4 + 3)
+            )
+            # merge leads
+            merge_data.append(
+                self.get_merge_data(sheet_id, 1, 2, i * 4 + 3, i * 4 + 5)
+            )
+        self.merge_cells(settings.GS_KPI_TABLE_ID, merge_data)
+        self.add_borders(settings.GS_KPI_TABLE_ID, sheet_id, 0, days_amount + 5, 0, len(users) * 4 + 1)
 
     def create_sheet(self, sheet_name, table_id):
         body = {
