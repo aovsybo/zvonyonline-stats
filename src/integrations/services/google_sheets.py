@@ -238,6 +238,7 @@ class GoogleSheetsApi:
     def update_sheet_property(self, table_id: str, sheet_id: int, field_name: str, field_value: str):
         """
         Функция изменяет характеристику листа
+        :param table_id: идентификатор таблицы
         :param sheet_id: идентификатор листа
         :param field_name: имя изменяемого поля
         :param field_value: значение изменяемого поля
@@ -306,6 +307,14 @@ class GoogleSheetsApi:
             if user_name and user_name != "Дата"
         }
 
+    def get_current_sheet_name(self):
+        return f"{self.MONTH_FROM_NUM[int(datetime.now().strftime('%m'))]} {datetime.now().strftime('%Y')[-2:]}"
+
+    @staticmethod
+    def get_current_month_days_amount():
+        month, year = int(datetime.now().strftime('%m')), int(datetime.now().strftime('%Y'))
+        return calendar.monthrange(year, month)[1]
+
     def write_dates_column(self, sheet_name: str):
         self.write_to_google_sheet(
             [["Дата"]],
@@ -316,7 +325,6 @@ class GoogleSheetsApi:
         month, year = int(datetime.now().strftime('%m')), int(datetime.now().strftime('%Y'))
         num_days = calendar.monthrange(year, month)[1]
         days = [[date(year, month, day).strftime("%Y-%m-%d")] for day in range(1, num_days + 1)]
-        days_amount = len(days)
         days.append(["Итого"])
         days.append([])
         days.append(["Премии"])
@@ -326,7 +334,6 @@ class GoogleSheetsApi:
             sheet_name,
             f"A{self.KPI_TABLE_START_CELL_NUM}:A{len(days) + self.KPI_TABLE_START_CELL_NUM}"
         )
-        return days_amount
 
     def get_cell_num_by_date(self, sheet_name):
         current_date = datetime.now().strftime("%Y-%m-%d")
@@ -395,6 +402,11 @@ class GoogleSheetsApi:
             f"{start_letter}:{self.calc_cell_letter(start_letter, 3)}"
         )
 
+    def append_kpi_new_user(self, user_name, index):
+        sheet_name = self.get_current_sheet_name()
+        days_amount = self.get_current_month_days_amount()
+        self.add_kpi_column(sheet_name, user_name, index, days_amount)
+
     def add_borders(self, table_id, sheet_id, start_row, end_row, start_col, end_col):
         sides = ["top", "bottom", "left", "right", "innerHorizontal", "innerVertical"]
         body = {
@@ -455,7 +467,7 @@ class GoogleSheetsApi:
         )
         self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "index", "0")
         merge_data = []
-        days_amount = self.write_dates_column(sheet_name)
+        days_amount = self.get_current_month_days_amount()
         # merge data field
         merge_data.append(
             self.get_merge_data(sheet_id, 0, 3, 0, 1)
@@ -494,17 +506,8 @@ class GoogleSheetsApi:
         ).execute()
         return response["replies"][0]["addSheet"]["properties"]["sheetId"]
 
-    # def crate_kpi_sheet(self, users, sheet_name):
-    #     sheet_id = self.create_sheet_copy(
-    #         settings.GS_KPI_TABLE_ID,
-    #         settings.GS_KPI_MAIN_SHEET_ID,
-    #     )
-    #     self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "title", sheet_name)
-    #     self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "index", "0")
-    #     self.write_dates_column(sheet_name)
-
     def create_kpi_report(self, users_stat: dict):
-        sheet_name = f"{self.MONTH_FROM_NUM[int(datetime.now().strftime('%m'))]} {datetime.now().strftime('%Y')[-2:]}"
+        sheet_name = self.get_current_sheet_name()
         if sheet_name not in self.get_sheet_names(settings.GS_KPI_TABLE_ID):
             self.crate_kpi_sheet(users_stat.keys(), sheet_name)
         cell_num = self.get_cell_num_by_date(sheet_name)

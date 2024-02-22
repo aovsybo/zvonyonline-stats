@@ -120,7 +120,7 @@ def get_relevant_users():
             serializer = UsersKPISerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                # google_sheets_api.add_kpi_column(user)
+                google_sheets_api.append_kpi_new_user(user, len(relevant_users))
     db_users = UsersKPISerializer(UsersKPI.objects.all(), many=True).data
     for user in db_users:
         if user["name"] not in relevant_users:
@@ -132,7 +132,6 @@ def get_kpi_report():
     end_time = datetime.now()
     start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
     user_names = get_relevant_users()
-    # user_names = google_sheets_api.get_kpi_user_cells().keys()
     users = skorozvon_api.get_users()
     if not users:
         return
