@@ -33,19 +33,6 @@ class SkorozvonAPI:
         except Exception:
             return None
 
-    # def get_scenarios_ids(self):
-    #     response = self.get_request(
-    #         sub_url="scenarios",
-    #         params={"length": 100},
-    #     )
-    #     if not response:
-    #         return None
-    #     return {
-    #         project["name"]: project["id"]
-    #         for project in response["data"]
-    #         if project["name"] in settings.SKOROZVON_SCENARIO_TO_GS_NAME.keys()
-    #     }
-
     def get_projects_ids(self):
         response = self.get_request(
             sub_url="call_projects",
@@ -64,13 +51,6 @@ class SkorozvonAPI:
         if not users:
             return None
         return {user["name"]: user["id"] for user in users}
-
-    # def get_user_id_by_name(self, user_name: str):
-    #     users = self.get_users()
-    #     if not users:
-    #         return None
-    #     users_by_name = list(filter(lambda user: user["name"] == user_name, users))
-    #     return users_by_name[0]["id"] if users_by_name else ""
 
 
 skorozvon_api = SkorozvonAPI()

@@ -120,7 +120,7 @@ def get_relevant_users():
             serializer = UsersKPISerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                google_sheets_api.append_kpi_new_user(user, len(relevant_users))
+                google_sheets_api.append_kpi_new_user(user, len(relevant_users) - 1)
     db_users = UsersKPISerializer(UsersKPI.objects.all(), many=True).data
     for user in db_users:
         if user["name"] not in relevant_users:
@@ -137,11 +137,17 @@ def get_kpi_report():
         return
     users_stat = dict()
     for user_name in user_names:
-        users_stat[user_name] = get_user_stat(
-            start_time,
-            end_time,
-            users[user_name]
-        )
+        if user_name in users:
+            users_stat[user_name] = get_user_stat(
+                start_time,
+                end_time,
+                users[user_name]
+            )
+        else:
+            users_stat[user_name] = {
+                "dialogs": "-",
+                "leads": "-",
+            }
     google_sheets_api.create_kpi_report(users_stat)
 
 
@@ -155,14 +161,14 @@ def get_intervals(count: int):
 
 
 def start():
-    scheduler = BackgroundScheduler()
-    jobs = [
-        get_two_weeks_report,
-        get_month_report,
-        get_kpi_report
-    ]
-    intervals = get_intervals(len(jobs))
-    for i, job in enumerate(jobs):
-        scheduler.add_job(job, 'cron', minute=intervals[i])
-    scheduler.start()
+    # scheduler = BackgroundScheduler()
+    # jobs = [
+    #     get_two_weeks_report,
+    #     get_month_report,
+    #     get_kpi_report
+    # ]
+    # intervals = get_intervals(len(jobs))
+    # for i, job in enumerate(jobs):
+    #     scheduler.add_job(job, 'cron', minute=intervals[i])
+    # scheduler.start()
     pass

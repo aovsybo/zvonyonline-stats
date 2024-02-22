@@ -406,6 +406,12 @@ class GoogleSheetsApi:
         sheet_name = self.get_current_sheet_name()
         days_amount = self.get_current_month_days_amount()
         self.add_kpi_column(sheet_name, user_name, index, days_amount)
+        self.add_borders(
+            settings.GS_KPI_TABLE_ID,
+            "1862082680",
+            0, days_amount + 6,
+            index * 4 + 1, index * 4 + 5
+        )
 
     def add_borders(self, table_id, sheet_id, start_row, end_row, start_col, end_col):
         sides = ["top", "bottom", "left", "right", "innerHorizontal", "innerVertical"]
@@ -466,6 +472,7 @@ class GoogleSheetsApi:
             sheet_name=sheet_name
         )
         self.update_sheet_property(settings.GS_KPI_TABLE_ID, sheet_id, "index", "0")
+        self.write_dates_column(sheet_name)
         merge_data = []
         days_amount = self.get_current_month_days_amount()
         # merge data field
@@ -485,6 +492,16 @@ class GoogleSheetsApi:
             # merge leads
             merge_data.append(
                 self.get_merge_data(sheet_id, 1, 2, i * 4 + 3, i * 4 + 5)
+            )
+            # merge premium
+            merge_data.append(
+                self.get_merge_data(
+                    sheet_id,
+                    self.KPI_TABLE_START_CELL_NUM + days_amount + 1,
+                    self.KPI_TABLE_START_CELL_NUM + days_amount + 2,
+                    i * 4 + 1,
+                    i * 4 + 5
+                )
             )
         self.merge_cells(settings.GS_KPI_TABLE_ID, merge_data)
         self.add_borders(settings.GS_KPI_TABLE_ID, sheet_id, 0, days_amount + 6, 0, len(users) * 4 + 1)
