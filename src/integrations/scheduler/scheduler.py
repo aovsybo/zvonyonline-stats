@@ -132,7 +132,7 @@ def get_kpi_report():
     end_time = datetime.now()
     start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
     user_names = get_relevant_users()
-    user_names = google_sheets_api.get_kpi_user_cells().keys()
+    # user_names = google_sheets_api.get_kpi_user_cells().keys()
     users = skorozvon_api.get_users()
     if not users:
         return
@@ -156,14 +156,14 @@ def get_intervals(count: int):
 
 
 def start():
-    # scheduler = BackgroundScheduler()
-    # jobs = [
-    #     get_two_weeks_report,
-    #     get_month_report,
-    #     get_kpi_report
-    # ]
-    # intervals = get_intervals(len(jobs))
-    # for i, job in enumerate(jobs):
-    #     scheduler.add_job(job, 'cron', minute=intervals[i])
-    # scheduler.start()
+    scheduler = BackgroundScheduler()
+    jobs = [
+        get_two_weeks_report,
+        get_month_report,
+        get_kpi_report
+    ]
+    intervals = get_intervals(len(jobs))
+    for i, job in enumerate(jobs):
+        scheduler.add_job(job, 'cron', minute=intervals[i])
+    scheduler.start()
     pass

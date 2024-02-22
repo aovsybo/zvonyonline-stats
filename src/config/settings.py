@@ -37,7 +37,7 @@ GS_LEADS_MAIN_SHEET_ID = os.environ.get("GS_LEADS_MAIN_SHEET_ID")
 GS_LEADS_MAIN_SHEET_NAME = "Шаблон"
 GS_KPI_TABLE_ID = os.environ.get("GS_KPI_TABLE_ID")
 GS_KPI_MAIN_SHEET_ID = os.environ.get("GS_KPI_MAIN_SHEET_ID")
-GS_KPI_MAIN_SHEET_NAME = "Шаблон"
+# GS_KPI_MAIN_SHEET_NAME = "Шаблон"
 GS_KPI_USERS_SHEET_NAME = "Сотрудники"
 GS_KPI_USERS_SHEET_TEMPLATE_NAME = "Шаблон по сотруднику"
 
