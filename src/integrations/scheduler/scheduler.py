@@ -161,14 +161,14 @@ def get_intervals(count: int):
 
 
 def start():
-    # scheduler = BackgroundScheduler()
-    # jobs = [
-    #     get_two_weeks_report,
-    #     get_month_report,
-    #     get_kpi_report
-    # ]
-    # intervals = get_intervals(len(jobs))
-    # for i, job in enumerate(jobs):
-    #     scheduler.add_job(job, 'cron', minute=intervals[i])
-    # scheduler.start()
+    scheduler = BackgroundScheduler()
+    jobs = [
+        get_two_weeks_report,
+        get_month_report,
+        get_kpi_report
+    ]
+    intervals = get_intervals(len(jobs))
+    for i, job in enumerate(jobs):
+        scheduler.add_job(job, 'cron', minute=intervals[i])
+    scheduler.start()
     pass

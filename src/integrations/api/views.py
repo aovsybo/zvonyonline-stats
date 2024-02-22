@@ -13,9 +13,8 @@ logger = logging.getLogger(__name__)
 
 class Test(ListAPIView):
     def get(self, request, *args, **kwargs):
-        from ..scheduler.scheduler import get_kpi_report
-        import time
-        get_kpi_report()
+        # from ..scheduler.scheduler import get_kpi_report
+        # get_kpi_report()
         return Response(status=status.HTTP_201_CREATED)
 
 
