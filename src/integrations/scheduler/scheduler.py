@@ -120,7 +120,7 @@ def get_relevant_users():
             serializer = UsersKPISerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                google_sheets_api.add_kpi_column(user)
+                # google_sheets_api.add_kpi_column(user)
     db_users = UsersKPISerializer(UsersKPI.objects.all(), many=True).data
     for user in db_users:
         if user["name"] not in relevant_users:
