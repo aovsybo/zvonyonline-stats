@@ -210,7 +210,7 @@ def create_report_for_interval(start_date, end_date, prev_start_date):
     create_report(projects_stat, start_date, end_date, prev_start_date)
 
 
-def get_two_weeks_report():
+def update_two_weeks_report():
     """
     Создает двухнедельный отчет о контактах, диалогах и лидах
     """
@@ -227,7 +227,7 @@ def get_two_weeks_report():
     create_report_for_interval(start_date, end_date, prev_start_date)
 
 
-def get_month_report():
+def update_month_report():
     """
     Создает месячный отчет о контактах, диалогах и лидах
     """

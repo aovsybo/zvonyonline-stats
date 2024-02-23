@@ -280,11 +280,10 @@ def get_relevant_users():
     return [user["name"] for user in UsersKPISerializer(UsersKPI.objects.all(), many=True).data]
 
 
-def get_kpi_report():
+def update_kpi_report():
     """
     Запускает создание/обновление отчета по статистике сотрудников
     """
-    # TODO: update, not get
     end_time = datetime.now()
     start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
     user_names = get_relevant_users()

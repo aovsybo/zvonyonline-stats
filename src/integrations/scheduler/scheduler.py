@@ -1,7 +1,7 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from .kpi_statistics import get_kpi_report
-from .dialogs_statistics import get_month_report, get_two_weeks_report
+from .kpi_statistics import update_kpi_report
+from .dialogs_statistics import update_month_report, update_two_weeks_report
 
 
 def get_intervals(count: int):
@@ -16,9 +16,9 @@ def get_intervals(count: int):
 def start():
     scheduler = BackgroundScheduler()
     jobs = [
-        get_two_weeks_report,
-        get_month_report,
-        get_kpi_report
+        update_two_weeks_report,
+        update_month_report,
+        update_kpi_report
     ]
     intervals = get_intervals(len(jobs))
     for i, job in enumerate(jobs):
