@@ -13,9 +13,10 @@ logger = logging.getLogger(__name__)
 
 class Test(ListAPIView):
     def get(self, request, *args, **kwargs):
-        # from ..scheduler.scheduler import get_kpi_report
-        # get_kpi_report()
-        return Response(status=status.HTTP_201_CREATED)
+        from ..scheduler.kpi_statistics import get_current_sheet_id
+        data = dict()
+        data["s"] = get_current_sheet_id()
+        return Response(data=data, status=status.HTTP_201_CREATED)
 
 
 class WriteDataToGoogleSheet(CreateAPIView):
