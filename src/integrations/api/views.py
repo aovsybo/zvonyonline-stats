@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 class Test(ListAPIView):
     def get(self, request, *args, **kwargs):
-        from ..scheduler.kpi_statistics import get_current_sheet_id
+        from ..scheduler.kpi_statistics import update_kpi_statistics
         data = dict()
-        data["s"] = get_current_sheet_id()
+        data["s"] = update_kpi_statistics()
         return Response(data=data, status=status.HTTP_201_CREATED)
 
 

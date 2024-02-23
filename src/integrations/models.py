@@ -3,6 +3,7 @@ from django.db import models
 
 class UsersKPI(models.Model):
     name = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
 
 
 class CallDataInfo(models.Model):

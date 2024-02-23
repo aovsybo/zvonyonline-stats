@@ -132,9 +132,25 @@ def append_kpi_new_user(user_name, index):
     :return:
     """
     sheet_name = get_current_sheet_name()
+    sheet_id = google_sheets_api.get_sheet_id_by_name(
+        settings.GS_KPI_TABLE_ID,
+        sheet_name,
+    )
     days_amount = get_current_month_days_amount()
     add_kpi_column(sheet_name, user_name, index, days_amount)
-    # TODO: calc correctly
+    merge_data = [
+        google_sheets_api.get_merge_data(sheet_id, 0, 1, index * 4 + 1, index * 4 + 5),
+        google_sheets_api.get_merge_data(sheet_id, 1, 2, index * 4 + 1, index * 4 + 3),
+        google_sheets_api.get_merge_data(sheet_id, 1, 2, index * 4 + 3, index * 4 + 5),
+        google_sheets_api.get_merge_data(
+            sheet_id,
+            google_sheets_api.KPI_TABLE_START_CELL_NUM + days_amount + 1,
+            google_sheets_api.KPI_TABLE_START_CELL_NUM + days_amount + 2,
+            index * 4 + 1,
+            index * 4 + 5
+        ),
+    ]
+    google_sheets_api.merge_cells(settings.GS_KPI_TABLE_ID, merge_data)
     google_sheets_api.add_borders(
         settings.GS_KPI_TABLE_ID,
         get_current_sheet_id(),
@@ -241,8 +257,10 @@ def add_kpi_column(sheet_name, user_name, index, days_amount):
     for i in range(2):
         current_letter = google_sheets_api.calc_cell_letter(start_letter, i * 2 + 1)
         data[-1][i * 2 + 1] = (
-            f'={current_letter}{google_sheets_api.KPI_TABLE_START_CELL_NUM + days_amount}-'
-            f'{google_sheets_api.calc_cell_letter(current_letter, -1)}{google_sheets_api.KPI_TABLE_START_CELL_NUM + days_amount}'
+            f'={current_letter}'
+            f'{google_sheets_api.KPI_TABLE_START_CELL_NUM + days_amount}-'
+            f'{google_sheets_api.calc_cell_letter(current_letter, -1)}'
+            f'{google_sheets_api.KPI_TABLE_START_CELL_NUM + days_amount}'
         )
     data[-1][2] = (
         f'={google_sheets_api.calc_cell_letter(start_letter, 3)}'
@@ -256,7 +274,7 @@ def add_kpi_column(sheet_name, user_name, index, days_amount):
         data,
         settings.GS_KPI_TABLE_ID,
         sheet_name,
-        f"{start_letter}:{google_sheets_api.calc_cell_letter(start_letter, 3)}"
+        f"{start_letter}1:{google_sheets_api.calc_cell_letter(start_letter, 3)}{len(data) + 1}"
     )
 
 
@@ -272,11 +290,15 @@ def get_relevant_users():
             serializer = UsersKPISerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
-                append_kpi_new_user(user, len(relevant_users) - 1)
-    db_users = UsersKPISerializer(UsersKPI.objects.all(), many=True).data
-    for user in db_users:
+                users_amount = UsersKPI.objects.all().count()
+                append_kpi_new_user(user, users_amount - 1)
+        else:
+            serializer = UsersKPISerializer(UsersKPI.objects.get(**data))
+            if not serializer.data["is_active"]:
+                UsersKPI.objects.filter(pk=serializer.data["id"]).update(is_active=True)
+    for user in UsersKPISerializer(UsersKPI.objects.all(), many=True).data:
         if user["name"] not in relevant_users:
-            UsersKPI.objects.filter(id=user["id"]).delete()
+            UsersKPI.objects.filter(pk=user["id"]).update(is_active=False)
     return [user["name"] for user in UsersKPISerializer(UsersKPI.objects.all(), many=True).data]
 
 
