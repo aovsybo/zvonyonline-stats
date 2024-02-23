@@ -181,7 +181,7 @@ def create_report(projects_stat: dict, start_date: int, end_date: int, prev_star
     )
 
 
-def create_report_for_interval(start_date, end_date, prev_start_date):
+def write_updated_dialog_statistics(start_date, end_date, prev_start_date):
     """
     Собирает статистику по проектам за выбранный интервал и создает отчет
     """
@@ -210,7 +210,7 @@ def create_report_for_interval(start_date, end_date, prev_start_date):
     create_report(projects_stat, start_date, end_date, prev_start_date)
 
 
-def update_two_weeks_report():
+def update_two_weeks_dialog_statistics():
     """
     Создает двухнедельный отчет о контактах, диалогах и лидах
     """
@@ -224,10 +224,10 @@ def update_two_weeks_report():
     start_date = datetime.timestamp(two_weeks_ago)
     end_date = datetime.timestamp(today)
     prev_start_date = datetime.timestamp(today - relativedelta(months=1))
-    create_report_for_interval(start_date, end_date, prev_start_date)
+    write_updated_dialog_statistics(start_date, end_date, prev_start_date)
 
 
-def update_month_report():
+def update_month_dialog_statistics():
     """
     Создает месячный отчет о контактах, диалогах и лидах
     """
@@ -235,4 +235,4 @@ def update_month_report():
     start_date = datetime.timestamp(today)
     end_date = datetime.timestamp(today + relativedelta(months=1))
     prev_start_date = datetime.timestamp(today - relativedelta(months=1))
-    create_report_for_interval(start_date, end_date, prev_start_date)
+    write_updated_dialog_statistics(start_date, end_date, prev_start_date)

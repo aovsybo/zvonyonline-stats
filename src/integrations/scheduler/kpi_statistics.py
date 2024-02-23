@@ -103,7 +103,7 @@ def get_kpi_user_cells(sheet_name):
     }
 
 
-def create_kpi_report(users_stat: dict):
+def write_updated_kpi_data(users_stat: dict):
     """
     Функция записывает статистику сотрудника в соответствующую ячейку
     :param users_stat: статистика контактов, диалогов и лидов по сотрудникам
@@ -280,7 +280,7 @@ def get_relevant_users():
     return [user["name"] for user in UsersKPISerializer(UsersKPI.objects.all(), many=True).data]
 
 
-def update_kpi_report():
+def update_kpi_statistics():
     """
     Запускает создание/обновление отчета по статистике сотрудников
     """
@@ -303,4 +303,4 @@ def update_kpi_report():
                 "dialogs": "-",
                 "leads": "-",
             }
-    create_kpi_report(users_stat)
+    write_updated_kpi_data(users_stat)
