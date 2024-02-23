@@ -15,7 +15,7 @@ class Test(ListAPIView):
     def get(self, request, *args, **kwargs):
         from ..scheduler.kpi_statistics import update_kpi_statistics
         data = dict()
-        data["s"] = update_kpi_statistics()
+        # data["s"] = update_kpi_statistics()
         return Response(data=data, status=status.HTTP_201_CREATED)
 
 
