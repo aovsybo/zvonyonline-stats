@@ -58,6 +58,8 @@ def write_project_stat_to_google_sheet(sheet_name: str, projects_stat: dict, is_
             elif project in projects_stat:
                 result.append(projects_stat[project][column])
                 project_total += result[-1]
+            else:
+                result.append(0)
         cell_num = field_table_shift[column]
         column_num = google_sheets_api.calc_cell_letter(start_cell_letter, cell_num)
         sheet_range = (f"{column_num}{google_sheets_api.START_CELL_NUM}:"
