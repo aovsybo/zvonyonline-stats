@@ -10,9 +10,6 @@ from .serializers import CallDataInfoSerializer
 
 logger = logging.getLogger(__name__)
 
-# TODO: debug false on prod
-# TODO: rm inactive users when create google sheet
-
 
 class Test(ListAPIView):
     def get(self, request, *args, **kwargs):
