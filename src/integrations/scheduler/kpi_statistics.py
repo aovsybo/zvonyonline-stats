@@ -4,7 +4,7 @@ from datetime import datetime, date
 from django.conf import settings
 
 from ..api.serializers import UsersKPISerializer
-from .db_requests import get_user_stat
+from .db_requests import get_user_stat, remove_inactive_users
 from ..models import UsersKPI
 from ..services.skorozvon import skorozvon_api
 from ..services.google_sheets import google_sheets_api
@@ -110,6 +110,7 @@ def write_updated_kpi_data(users_stat: dict):
     """
     sheet_name = get_current_sheet_name()
     if sheet_name not in google_sheets_api.get_sheet_names(settings.GS_KPI_TABLE_ID):
+        remove_inactive_users()
         create_kpi_sheet(users_stat.keys(), sheet_name)
     cell_num = get_cell_num_by_date(sheet_name)
     for user, column_name in get_kpi_user_cells(sheet_name).items():

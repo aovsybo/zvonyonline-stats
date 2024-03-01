@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.conf import settings
 
-from ..models import CallDataInfo, Leads
+from ..models import CallDataInfo, Leads, UsersKPI
 
 
 def get_user_stat(start_date: datetime, end_date: datetime, user_id: int) -> dict:
@@ -65,6 +65,10 @@ def get_db_dialogs_count_for_interval(start_date, end_date, project_id):
         .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
         .count()
     )
+
+
+def remove_inactive_users():
+    UsersKPI.objects.filter(is_active=False).delete()
 
 
 def get_db_leads_count_for_interval(start_date, end_date, project_id):
