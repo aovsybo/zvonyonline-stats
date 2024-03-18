@@ -103,30 +103,6 @@ def get_kpi_user_cells(sheet_name):
     }
 
 
-#######################################
-def actualize_kpi_data(users_stat: dict, current_date):
-    """
-    Функция записывает статистику сотрудника в соответствующую ячейку
-    :param users_stat: статистика контактов, диалогов и лидов по сотрудникам
-    """
-    sheet_name = "Март 24"
-    if sheet_name not in google_sheets_api.get_sheet_names(settings.GS_KPI_TABLE_ID):
-        remove_inactive_users()
-        create_kpi_sheet(users_stat.keys(), sheet_name)
-    cell_num = get_cell_num_by_custom_date(sheet_name, current_date)
-    for user, column_name in get_kpi_user_cells(sheet_name).items():
-        field_shifts = {"dialogs": 1, "leads": 3}
-        for field, shift in field_shifts.items():
-            cell_address = f"{google_sheets_api.calc_cell_letter(column_name, shift)}{cell_num}"
-            google_sheets_api.write_to_google_sheet(
-                [[users_stat[user][field]]],
-                settings.GS_KPI_TABLE_ID,
-                sheet_name,
-                cell_address
-            )
-    #######################################
-
-
 def write_updated_kpi_data(users_stat: dict):
     """
     Функция записывает статистику сотрудника в соответствующую ячейку
@@ -180,7 +156,7 @@ def append_kpi_new_user(user_name, index):
         settings.GS_KPI_TABLE_ID,
         get_current_sheet_id(),
         0, days_amount + 6,
-        index * 4 + 1, index * 4 + 5
+           index * 4 + 1, index * 4 + 5
     )
 
 
@@ -233,21 +209,6 @@ def write_dates_column(sheet_name: str):
         sheet_name,
         f"A{google_sheets_api.KPI_TABLE_START_CELL_NUM}:A{len(days) + google_sheets_api.KPI_TABLE_START_CELL_NUM}"
     )
-
-
-###############################
-def get_cell_num_by_custom_date(sheet_name, current_date):
-    """
-    Возвращает номер строки в таблице для текущей даты
-    :param sheet_name: название листа
-    :return: номер строки текущей даты
-    """
-    return google_sheets_api.get_table_data(
-        settings.GS_KPI_TABLE_ID,
-        sheet_name,
-        f"A{google_sheets_api.KPI_TABLE_START_CELL_NUM}:A{google_sheets_api.KPI_TABLE_FINISH_CELL_NUM}"
-    ).index([current_date]) + google_sheets_api.KPI_TABLE_START_CELL_NUM
-###############################
 
 
 def get_cell_num_by_date(sheet_name):
@@ -340,37 +301,6 @@ def get_relevant_users():
         if user["name"] not in relevant_users:
             UsersKPI.objects.filter(pk=user["id"]).update(is_active=False)
     return [user["name"] for user in UsersKPISerializer(UsersKPI.objects.all(), many=True).data]
-
-
-########################################################
-def update_kpi_month_stat():
-    data = datetime.now()
-    for i in range(1, 16):
-        start_time = data.replace(day=i, hour=0, minute=0, second=0, microsecond=0)
-        end_time = start_time.replace(hour=23, minute=59, second=59, microsecond=59)
-        actualize_kpi_day_statistics(start_time, end_time)
-
-
-def actualize_kpi_day_statistics(start_time, end_time):
-    user_names = get_relevant_users()
-    users = skorozvon_api.get_users()
-    if not users:
-        return
-    users_stat = dict()
-    for user_name in user_names:
-        if user_name in users:
-            users_stat[user_name] = get_user_stat(
-                start_time,
-                end_time,
-                users[user_name]
-            )
-        else:
-            users_stat[user_name] = {
-                "dialogs": "-",
-                "leads": "-",
-            }
-    actualize_kpi_data(users_stat, start_time.strftime("%Y-%m-%d"))
-########################################################
 
 
 def update_kpi_statistics():

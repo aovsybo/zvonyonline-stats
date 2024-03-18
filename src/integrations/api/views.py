@@ -1,21 +1,13 @@
 import json
 import logging
 
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import CallDataInfoSerializer
 
-from ..scheduler.kpi_statistics import update_kpi_month_stat
-
 logger = logging.getLogger(__name__)
-
-
-class Test(ListAPIView):
-    def get(self, request, *args, **kwargs):
-        update_kpi_month_stat()
-        return Response(status=status.HTTP_201_CREATED)
 
 
 class WriteDataToGoogleSheet(CreateAPIView):
