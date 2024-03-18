@@ -7,14 +7,15 @@ from rest_framework import status
 
 from .serializers import CallDataInfoSerializer
 
+from ..scheduler.kpi_statistics import update_kpi_month_stat
 
 logger = logging.getLogger(__name__)
 
 
 class Test(ListAPIView):
     def get(self, request, *args, **kwargs):
-        data = dict()
-        return Response(data=data, status=status.HTTP_201_CREATED)
+        update_kpi_month_stat()
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class WriteDataToGoogleSheet(CreateAPIView):

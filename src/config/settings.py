@@ -106,7 +106,7 @@ SCOROZVON_WORKING_DIALOG_RESULT_NAMES = [
 ]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG")
+DEBUG = True if os.environ.get("DEBUG") == 'True' else False
 
 LOGGING = {
     "version": 1,
