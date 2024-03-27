@@ -197,7 +197,6 @@ def write_updated_dialog_statistics(start_date, end_date, prev_start_date):
         "end_date": end_date,
     }
     for project_name, project_id in project_ids.items():
-        # TODO: get scenario_id from project_id
         scenario_name = settings.SKOROZVON_PROJECT_TO_SKOROZVON_SCENARIO_NAME.get(project_name, "")
         scenario_id = scenario_ids.get(scenario_name, "")
         projects_stat[project_name] = {

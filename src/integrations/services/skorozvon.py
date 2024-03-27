@@ -43,8 +43,7 @@ class SkorozvonAPI:
         return {
             project["title"]: project["id"]
             for project in response["data"]
-            # TODO: check GS_TO_SKOROZVON_PROJECT_NAME.values()
-            if project["title"] in settings.SKOROZVON_PROJECT_TO_GS_NAME.keys()
+            if project["title"] in settings.GS_TO_SKOROZVON_PROJECT_NAME.values()
         }
 
     def get_scenarios_ids(self):
