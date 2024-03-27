@@ -46,10 +46,7 @@ def get_db_contacts_count_for_interval(start_date, end_date, project_id):
     )
 
 
-# select count(*) from integrations_calldatainfo where (call_result_result_name='Лид' or call_result_result_name='Отказ'  or call_result_result_name='Спорный') and save_date < '2024-03-16 00:00:00' and save_date >= '2024-03-01 00:00:00' and call_call_project_id='50000070364';
-# select count(*) from integrations_calldatainfo where call_scenario_id='50000011959' and (call_result_result_name='Лид' or call_result_result_name='Отказ'  or call_result_result_name='Спорный') and save_date < '2024-03-16 00:00:00' and save_date >= '2024-03-01 00:00:00';
-
-
+# select count(distinct call_id) from integrations_calldatainfo where call_scenario_id='50000011958' and call_result_result_name in ('Отказ', 'Лид', 'Спорный', 'Успех') and save_date >= '2024-03-20 00:00:00' and save_date < '2024-03-21 00:00:00';
 def get_db_dialogs_count_for_interval(start_date, end_date, scenario_id):
     """
     Считает диалоги по проекту за выбранный интервал. Диалог - любой разговор более 15 секунд,
@@ -64,10 +61,10 @@ def get_db_dialogs_count_for_interval(start_date, end_date, scenario_id):
     return (
         CallDataInfo.objects.filter(save_date__gte=start_date)
         .filter(save_date__lt=end_date)
-        # .filter(call_call_project_id=project_id)
+        .filter(call_duration__ge=1)
         .filter(call_scenario_id=scenario_id)
         .filter(call_result_result_name__in=settings.SCOROZVON_DIALOG_RESULT_NAMES)
-        # .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
+        .distinct("call_id")
         .count()
     )
 
@@ -85,10 +82,10 @@ def get_db_leads_count_for_interval(start_date, end_date, scenario_id):
     return (
         CallDataInfo.objects.filter(save_date__gte=start_date)
         .filter(save_date__lt=end_date)
-        # .filter(call_call_project_id=project_id)
+        .filter(call_duration__ge=1)
         .filter(call_scenario_id=scenario_id)
-        # .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
         .filter(call_result_result_id__in=settings.SCOROZVON_WORKING_RESULT_IDS)
+        .distinct("call_id")
         .count()
     )
 
