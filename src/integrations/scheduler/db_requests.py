@@ -46,13 +46,17 @@ def get_db_contacts_count_for_interval(start_date, end_date, project_id):
     )
 
 
-def get_db_dialogs_count_for_interval(start_date, end_date, project_id):
+# select count(*) from integrations_calldatainfo where (call_result_result_name='Лид' or call_result_result_name='Отказ'  or call_result_result_name='Спорный') and save_date < '2024-03-16 00:00:00' and save_date >= '2024-03-01 00:00:00' and call_call_project_id='50000070364';
+# select count(*) from integrations_calldatainfo where call_scenario_id='50000011959' and (call_result_result_name='Лид' or call_result_result_name='Отказ'  or call_result_result_name='Спорный') and save_date < '2024-03-16 00:00:00' and save_date >= '2024-03-01 00:00:00';
+
+
+def get_db_dialogs_count_for_interval(start_date, end_date, scenario_id):
     """
     Считает диалоги по проекту за выбранный интервал. Диалог - любой разговор более 15 секунд,
     завершившийся отказом или успехом
     :param start_date:
     :param end_date:
-    :param project_id:
+    :param scenario_id:
     :return: количество проведенных диалогов
     """
     start_date = datetime.fromtimestamp(start_date)
@@ -60,23 +64,20 @@ def get_db_dialogs_count_for_interval(start_date, end_date, project_id):
     return (
         CallDataInfo.objects.filter(save_date__gte=start_date)
         .filter(save_date__lt=end_date)
-        .filter(call_call_project_id=project_id)
-        .filter(call_result_result_name__in=settings.SCOROZVON_WORKING_DIALOG_RESULT_NAMES)
-        .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
+        # .filter(call_call_project_id=project_id)
+        .filter(call_scenario_id=scenario_id)
+        .filter(call_result_result_name__in=settings.SCOROZVON_DIALOG_RESULT_NAMES)
+        # .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
         .count()
     )
 
 
-def remove_inactive_users():
-    UsersKPI.objects.filter(is_active=False).delete()
-
-
-def get_db_leads_count_for_interval(start_date, end_date, project_id):
+def get_db_leads_count_for_interval(start_date, end_date, scenario_id):
     """
     Считает лиды по проекту за выбранный интервал. Лид - диалог, завершившийся успехом
     :param start_date:
     :param end_date:
-    :param project_id:
+    :param scenario_id:
     :return: количество полученных лидов
     """
     start_date = datetime.fromtimestamp(start_date)
@@ -84,8 +85,13 @@ def get_db_leads_count_for_interval(start_date, end_date, project_id):
     return (
         CallDataInfo.objects.filter(save_date__gte=start_date)
         .filter(save_date__lt=end_date)
-        .filter(call_call_project_id=project_id)
-        .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
+        # .filter(call_call_project_id=project_id)
+        .filter(call_scenario_id=scenario_id)
+        # .filter(call_scenario_id__in=settings.SCOROZVON_WORKING_SCENARIO_IDS)
         .filter(call_result_result_id__in=settings.SCOROZVON_WORKING_RESULT_IDS)
         .count()
     )
+
+
+def remove_inactive_users():
+    UsersKPI.objects.filter(is_active=False).delete()

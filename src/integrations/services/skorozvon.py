@@ -43,7 +43,20 @@ class SkorozvonAPI:
         return {
             project["title"]: project["id"]
             for project in response["data"]
+            # TODO: check GS_TO_SKOROZVON_PROJECT_NAME.values()
             if project["title"] in settings.SKOROZVON_PROJECT_TO_GS_NAME.keys()
+        }
+
+    def get_scenarios_ids(self):
+        response = self.get_request(
+            sub_url="scenarios",
+            params={"length": 100},
+        )
+        if not response:
+            return None
+        return {
+            project["name"]: project["id"]
+            for project in response["data"]
         }
 
     def get_users(self):

@@ -19,7 +19,6 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -40,16 +39,16 @@ GS_KPI_MAIN_SHEET_ID = os.environ.get("GS_KPI_MAIN_SHEET_ID")
 GS_KPI_USERS_SHEET_NAME = "Сотрудники"
 GS_KPI_USERS_SHEET_TEMPLATE_NAME = "Шаблон"
 
-SKOROZVON_SCENARIO_TO_GS_NAME = {
-    "ЮСИ. Лидген Авито РНД": "ЮСИ. Лидген с Авито РнД",
-    "22.12.23 ЮСИ база Крд": "ЮСИ. ГКЦ РнД",
-    "ЮСИ. Сайты ЖК РНД (проект с оплатой за лид)": "ЮСИ. Сайты ЖК РнД. (Проект с оплатой за лид)",
-    "ЮСИ.СТВ Лидген с Авито ": "ЮСИ. Лидген с Авито Ств",
-    "ЮСИ ГКЦ Ств": "ЮСИ. ГКЦ Ств",
-    "ЮСИ. Сайты ЖК Ств (проект с оплатой за лид) ": "ЮСИ. Сайты ЖК Ств. (Проект с оплатой за лид)",
-    "ЮСИ Сайты Крд (проект с оплатой за лид)": "ЮСИ. Сайты ЖК Крд. (Проект с оплатой за лид)",
-    "ЮСИ ГКЦ Крд": "ЮСИ. ГКЦ Крд"
+SKOROZVON_PROJECT_TO_SKOROZVON_SCENARIO_NAME = {
+    "ЮСИ. Сайты ЖК СТВ (проект с оплатой за лид)": "ЮСИ. Сайты ЖК Ств (проект с оплатой за лид) ",
+    "ЮСИ Сайты ЖК Кдр (проект с оплатой за лид)": "ЮСИ Сайты Крд (проект с оплатой за лид)",
+    "ЮСИ. Сайты ЖК РнД (проект с оплатой за лид)":  "ЮСИ Сайты ЖК РНД (проект с оплатой за лид)",
+    "ЮСИ ГКЦ Крд": "ЮСИ ГКЦ Крд",
+    "ЮСИ ГКЦ РнД": "ЮСИ. ГКЦ РНД ",
+    "ЮСИ. Лидген с Авито. РнД": "ЮСИ. Лидген Авито РНД",
+    "ЮСИ. Лидген с Авито СТВ 15.08.2023": "ЮСИ.СТВ Лидген с Авито ",
 }
+
 GS_TO_SKOROZVON_PROJECT_NAME = {
     'ЮСИ. Лидген с Авито РнД': 'ЮСИ. Лидген с Авито. РнД',
     'ЮСИ. ГКЦ РнД': 'ЮСИ ГКЦ РнД',
@@ -85,24 +84,25 @@ SCOROZVON_WORKING_RESULT_IDS = [
     "50000237106",
     "50000253353",
 ]
-SCOROZVON_WORKING_SCENARIO_IDS = [
-    "50000011952",
-    "50000011960",
-    "50000011957",
-    "50000013183",
-    "50000011959",
-    "50000011956",
-    "50000011958",
-    "50000013363",
-    "50000012885",
-    "50000012866",
-    "50000013363",
-    "50000014134",
-]
-SCOROZVON_WORKING_DIALOG_RESULT_NAMES = [
+# SCOROZVON_WORKING_SCENARIO_IDS = [
+#     "50000011952",
+#     "50000011960",
+#     "50000011957",
+#     "50000013183",
+#     "50000011959",
+#     "50000011956",
+#     "50000011958",
+#     "50000013363",
+#     "50000012885",
+#     "50000012866",
+#     "50000013363",
+#     "50000014134",
+# ]
+SCOROZVON_DIALOG_RESULT_NAMES = [
     "Лид",
     "Успех",
     "Отказ",
+    "Спорный",
 ]
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -177,7 +177,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -185,14 +184,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME':  os.environ.get("MYSQL_DB"),
-        'USER':  os.environ.get("MYSQL_USER"),
-        'PASSWORD':  os.environ.get("MYSQL_PASSWORD"),
-        'HOST':  os.environ.get("MYSQL_HOST"),
-        'PORT':  os.environ.get("MYSQL_PORT", 3306),
+        'NAME': os.environ.get("MYSQL_DB"),
+        'USER': os.environ.get("MYSQL_USER"),
+        'PASSWORD': os.environ.get("MYSQL_PASSWORD"),
+        'HOST': os.environ.get("MYSQL_HOST"),
+        'PORT': os.environ.get("MYSQL_PORT", 3306),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -212,7 +210,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -223,7 +220,6 @@ TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

@@ -187,27 +187,23 @@ def write_updated_dialog_statistics(start_date, end_date, prev_start_date):
     """
     Собирает статистику по проектам за выбранный интервал и создает отчет
     """
-    projects_ids = skorozvon_api.get_projects_ids()
-    if not projects_ids:
+    project_ids = skorozvon_api.get_projects_ids()
+    scenario_ids = skorozvon_api.get_projects_ids()
+    if not project_ids:
         return
     projects_stat = dict()
-    for project_name, project_id in projects_ids.items():
+    filters = {
+        "start_date": start_date,
+        "end_date": end_date,
+    }
+    for project_name, project_id in project_ids.items():
+        # TODO: get scenario_id from project_id
+        scenario_name = settings.SKOROZVON_PROJECT_TO_SKOROZVON_SCENARIO_NAME.get(project_name, "")
+        scenario_id = scenario_ids.get(scenario_name, "")
         projects_stat[project_name] = {
-            "contacts": get_db_contacts_count_for_interval(
-                start_date=start_date,
-                end_date=end_date,
-                project_id=project_id,
-            ),
-            "dialogs": get_db_dialogs_count_for_interval(
-                start_date=start_date,
-                end_date=end_date,
-                project_id=project_id,
-            ),
-            "leads": get_db_leads_count_for_interval(
-                start_date=start_date,
-                end_date=end_date,
-                project_id=project_id,
-            ),
+            "contacts": get_db_contacts_count_for_interval(**filters, project_id=project_id),
+            "dialogs": get_db_dialogs_count_for_interval(**filters, scenario_id=scenario_id),
+            "leads": get_db_leads_count_for_interval(**filters, scenario_id=scenario_id),
         }
     create_report(projects_stat, start_date, end_date, prev_start_date)
 
