@@ -188,7 +188,7 @@ def write_updated_dialog_statistics(start_date, end_date, prev_start_date):
     Собирает статистику по проектам за выбранный интервал и создает отчет
     """
     project_ids = skorozvon_api.get_projects_ids()
-    scenario_ids = skorozvon_api.get_projects_ids()
+    scenario_ids = skorozvon_api.get_scenarios_ids()
     if not project_ids:
         return
     projects_stat = dict()
