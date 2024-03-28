@@ -64,7 +64,8 @@ def get_db_dialogs_count_for_interval(start_date, end_date, scenario_id):
         .filter(call_duration__gte=1)
         .filter(call_scenario_id=scenario_id)
         .filter(call_result_result_name__in=settings.SCOROZVON_DIALOG_RESULT_NAMES)
-        .distinct("call_id")
+        .values('call_id')
+        .distinct()
         .count()
     )
 
@@ -85,7 +86,8 @@ def get_db_leads_count_for_interval(start_date, end_date, scenario_id):
         .filter(call_duration__gte=1)
         .filter(call_scenario_id=scenario_id)
         .filter(call_result_result_id__in=settings.SCOROZVON_WORKING_RESULT_IDS)
-        .distinct("call_id")
+        .values('call_id')
+        .distinct()
         .count()
     )
 
