@@ -172,6 +172,7 @@ def create_or_update_report(projects_stat: dict, start_date, end_date, prev_star
     sheet_name = f"{str_form_unix(start_date)}-{str_form_unix(end_date)}"
     prev_sheet_name = f"{str_form_unix(prev_start_date)}-{str_form_unix(start_date)}"
     if sheet_name not in google_sheets_api.get_sheet_names(settings.GS_LEADS_TABLE_ID):
+        # TODO: construct template, not copy
         create_report_sheet(sheet_name, prev_sheet_name)
     write_project_stat_to_google_sheet(
         sheet_name=sheet_name,
