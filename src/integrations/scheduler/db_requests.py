@@ -2,7 +2,8 @@ from datetime import datetime
 
 from django.conf import settings
 
-from ..models import CallDataInfo, Leads, UsersKPI
+from ..models import CallDataInfo, Leads, UsersKPI, ProjectInfo
+from ..api.serializers import ProjectInfoSerializer
 
 
 def get_user_stat(start_date: datetime, end_date: datetime, user_id: int) -> dict:
@@ -46,7 +47,6 @@ def get_db_contacts_count_for_interval(start_date, end_date, project_id):
     )
 
 
-# select count(distinct call_id) from integrations_calldatainfo where call_scenario_id='50000011958' and call_result_result_name in ('Отказ', 'Лид', 'Спорный', 'Успех') and save_date >= '2024-03-20 00:00:00' and save_date < '2024-03-21 00:00:00';
 def get_db_dialogs_count_for_interval(start_date, end_date, scenario_id):
     """
     Считает диалоги по проекту за выбранный интервал. Диалог - любой разговор более 15 секунд,
@@ -94,3 +94,27 @@ def get_db_leads_count_for_interval(start_date, end_date, scenario_id):
 
 def remove_inactive_users():
     UsersKPI.objects.filter(is_active=False).delete()
+
+
+def deactivate_irrelevant_projects(project_titles):
+    projects = ProjectInfo.objects.filter(is_active=True)
+    projects_data = ProjectInfoSerializer(projects, many=True).data
+    for project in projects_data:
+        if project["project_title"] not in project_titles:
+            project_instance = ProjectInfo.objects.get(id=project["id"])
+            project_instance.is_active = False
+            project_instance.save()
+
+
+def update_projects_info(projects_info: list[dict]):
+    deactivate_irrelevant_projects([project["project_title"] for project in projects_info])
+    for project_info in projects_info:
+        if ProjectInfo.objects.filter(project_title=project_info["project_title"]).exists():
+            project_instance = ProjectInfo.objects.get(project_title=project_info["project_title"])
+            serializer = ProjectInfoSerializer(project_instance)
+            if serializer.data != project_info:
+                serializer.update(project_instance, project_info)
+        else:
+            serializer = ProjectInfoSerializer(data=project_info)
+            if serializer.is_valid():
+                serializer.save()

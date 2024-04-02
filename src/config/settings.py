@@ -34,6 +34,7 @@ GS_SCOPES = os.environ.get("GS_SCOPES").split(',')
 GS_LEADS_TABLE_ID = os.environ.get("GS_LEADS_TABLE_ID")
 GS_LEADS_MAIN_SHEET_ID = os.environ.get("GS_LEADS_MAIN_SHEET_ID")
 GS_LEADS_MAIN_SHEET_NAME = "Шаблон"
+GS_LEADS_PROJECTS_SHEET_NAME = "Проекты"
 GS_KPI_TABLE_ID = os.environ.get("GS_KPI_TABLE_ID")
 GS_KPI_MAIN_SHEET_ID = os.environ.get("GS_KPI_MAIN_SHEET_ID")
 GS_KPI_USERS_SHEET_NAME = "Сотрудники"
@@ -59,16 +60,7 @@ GS_TO_SKOROZVON_PROJECT_NAME = {
     'ЮСИ. Сайты ЖК Крд. (Проект с оплатой за лид)': 'ЮСИ Сайты ЖК Кдр (проект с оплатой за лид)',
     'ЮСИ. ГКЦ Крд': 'ЮСИ ГКЦ Крд'
 }
-# SKOROZVON_PROJECT_TO_GS_NAME = {
-#     "ЮСИ. Лидген с Авито. РнД": "ЮСИ. Лидген с Авито РнД",
-#     "ЮСИ ГКЦ РнД": "ЮСИ. ГКЦ РнД",
-#     "ЮСИ. Сайты ЖК РнД (проект с оплатой за лид)": "ЮСИ. Сайты ЖК РнД. (Проект с оплатой за лид)",
-#     "ЮСИ. Лидген с Авито СТВ 15.08.2023": "ЮСИ. Лидген с Авито Ств",
-#     "ЮСИ ГКЦ Ств": "ЮСИ. ГКЦ Ств",
-#     "ЮСИ. Сайты ЖК СТВ (проект с оплатой за лид)": "ЮСИ. Сайты ЖК Ств. (Проект с оплатой за лид)",
-#     "ЮСИ Сайты ЖК Кдр (проект с оплатой за лид)": "ЮСИ. Сайты ЖК Крд. (Проект с оплатой за лид)",
-#     "ЮСИ ГКЦ Крд": "ЮСИ. ГКЦ Крд"
-# }
+
 SCOROZVON_WORKING_RESULT_IDS = [
     "50000208191",
     "50000208187",

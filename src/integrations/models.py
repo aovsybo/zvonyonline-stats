@@ -6,6 +6,13 @@ class UsersKPI(models.Model):
     is_active = models.BooleanField(default=True)
 
 
+class ProjectInfo(models.Model):
+    client = models.CharField(max_length=255)
+    project_title = models.CharField(max_length=255)
+    scenario_title = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=True)
+
+
 class CallDataInfo(models.Model):
     type = models.CharField(max_length=255, null=True, blank=True)
 

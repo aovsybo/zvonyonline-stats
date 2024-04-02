@@ -6,11 +6,7 @@ from django.conf import settings
 
 from ..services.skorozvon import skorozvon_api
 from ..services.google_sheets import google_sheets_api
-from .db_requests import (
-    get_db_leads_count_for_interval,
-    get_db_dialogs_count_for_interval,
-    get_db_contacts_count_for_interval,
-)
+from . import db_requests as db
 
 LOCAL_TZ = 3
 
@@ -96,7 +92,7 @@ def get_project_indexes():
     project_indexes = []
     for i, line in enumerate(table):
         project_indexes.append(
-            line[0] if "ИТОГО" in line[0] else settings.GS_TO_SKOROZVON_PROJECT_NAME.get(line[1], "")
+            line[0] if "ИТОГО" in line[0] else line[1]
         )
         if len(line) == 1 and line[0] == "ИТОГО ПО ВСЕМ:":
             break
@@ -200,11 +196,30 @@ def write_updated_dialog_statistics(start_date, end_date, prev_start_date):
         scenario_name = settings.SKOROZVON_PROJECT_TO_SKOROZVON_SCENARIO_NAME.get(project_name, "")
         scenario_id = scenario_ids.get(scenario_name, "")
         projects_stat[project_name] = {
-            "contacts": get_db_contacts_count_for_interval(**filters, project_id=project_id),
-            "dialogs": get_db_dialogs_count_for_interval(**filters, scenario_id=scenario_id),
-            "leads": get_db_leads_count_for_interval(**filters, scenario_id=scenario_id),
+            "contacts": db.get_db_contacts_count_for_interval(**filters, project_id=project_id),
+            "dialogs": db.get_db_dialogs_count_for_interval(**filters, scenario_id=scenario_id),
+            "leads": db.get_db_leads_count_for_interval(**filters, scenario_id=scenario_id),
         }
     create_report(projects_stat, start_date, end_date, prev_start_date)
+
+
+def sync_projects_info():
+    table_info = google_sheets_api.get_table_data(
+        settings.GS_LEADS_TABLE_ID,
+        settings.GS_LEADS_PROJECTS_SHEET_NAME,
+        f"A:C"
+    )
+    projects_info = []
+    current_client = ""
+    for project in table_info[1:]:
+        if project[0]:
+            current_client = project[0]
+        projects_info.append({
+            "client": current_client,
+            "project_title": project[1],
+            "scenario_title": project[2],
+        })
+    db.update_projects_info(projects_info)
 
 
 def update_two_weeks_dialog_statistics():
