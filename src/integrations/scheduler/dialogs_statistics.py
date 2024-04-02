@@ -158,7 +158,7 @@ def create_report_sheet(sheet_name, prev_sheet_name):
     write_prev_data_to_google_sheet(sheet_name, prev_sheet_name)
 
 
-def create_report(projects_stat: dict, start_date: int, end_date: int, prev_start_date: int):
+def create_or_update_report(projects_stat: dict, start_date, end_date, prev_start_date):
     """
     Функция формирует отчет по статистике в таблицу.
     Создается копия листа-шаблона, переименовывается и устанавливается первым при отображении в таблице
@@ -179,28 +179,28 @@ def create_report(projects_stat: dict, start_date: int, end_date: int, prev_star
     )
 
 
-def write_updated_dialog_statistics(start_date, end_date, prev_start_date):
+def get_projects_stat(start_date, end_date) -> dict:
     """
     Собирает статистику по проектам за выбранный интервал и создает отчет
     """
     project_ids = skorozvon_api.get_projects_ids()
     scenario_ids = skorozvon_api.get_scenarios_ids()
-    if not project_ids:
-        return
     projects_stat = dict()
     filters = {
         "start_date": start_date,
         "end_date": end_date,
     }
-    for project_name, project_id in project_ids.items():
-        scenario_name = settings.SKOROZVON_PROJECT_TO_SKOROZVON_SCENARIO_NAME.get(project_name, "")
+    project_titles = db.get_active_project_titles()
+    for project_title in project_titles:
+        project_id = project_ids[project_title]
+        scenario_name = db.get_projects_info_by_title(project_title).get("scenario_title", "")
         scenario_id = scenario_ids.get(scenario_name, "")
-        projects_stat[project_name] = {
+        projects_stat[project_title] = {
             "contacts": db.get_db_contacts_count_for_interval(**filters, project_id=project_id),
             "dialogs": db.get_db_dialogs_count_for_interval(**filters, scenario_id=scenario_id),
             "leads": db.get_db_leads_count_for_interval(**filters, scenario_id=scenario_id),
         }
-    create_report(projects_stat, start_date, end_date, prev_start_date)
+    return projects_stat
 
 
 def sync_projects_info():
@@ -236,7 +236,9 @@ def update_two_weeks_dialog_statistics():
     start_date = datetime.timestamp(two_weeks_ago)
     end_date = datetime.timestamp(today)
     prev_start_date = datetime.timestamp(today - relativedelta(months=1))
-    write_updated_dialog_statistics(start_date, end_date, prev_start_date)
+    projects_stat = get_projects_stat(start_date, end_date)
+    print(projects_stat)
+    # create_or_update_report(projects_stat, start_date, end_date, prev_start_date)
 
 
 def update_month_dialog_statistics():
@@ -247,4 +249,6 @@ def update_month_dialog_statistics():
     start_date = datetime.timestamp(today)
     end_date = datetime.timestamp(today + relativedelta(months=1))
     prev_start_date = datetime.timestamp(today - relativedelta(months=1))
-    write_updated_dialog_statistics(start_date, end_date, prev_start_date)
+    projects_stat = get_projects_stat(start_date, end_date)
+    create_or_update_report(projects_stat, start_date, end_date, prev_start_date)
+

@@ -8,7 +8,7 @@ class UsersKPI(models.Model):
 
 class ProjectInfo(models.Model):
     client = models.CharField(max_length=255)
-    project_title = models.CharField(max_length=255)
+    project_title = models.CharField(max_length=255, unique=True)
     scenario_title = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
 

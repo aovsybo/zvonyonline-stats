@@ -118,3 +118,15 @@ def update_projects_info(projects_info: list[dict]):
             serializer = ProjectInfoSerializer(data=project_info)
             if serializer.is_valid():
                 serializer.save()
+
+
+def get_active_project_titles():
+    active_projects = ProjectInfo.objects.filter(is_active=True)
+    active_projects_data = ProjectInfoSerializer(active_projects, many=True).data
+    return [project["project_title"] for project in active_projects_data]
+
+
+def get_projects_info_by_title(project_title: str):
+
+    project = ProjectInfo.objects.get(project_title=project_title)
+    return ProjectInfoSerializer(project).data
