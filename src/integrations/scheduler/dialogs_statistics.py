@@ -237,8 +237,7 @@ def update_two_weeks_dialog_statistics():
     end_date = datetime.timestamp(today)
     prev_start_date = datetime.timestamp(today - relativedelta(months=1))
     projects_stat = get_projects_stat(start_date, end_date)
-    print(projects_stat)
-    # create_or_update_report(projects_stat, start_date, end_date, prev_start_date)
+    create_or_update_report(projects_stat, start_date, end_date, prev_start_date)
 
 
 def update_month_dialog_statistics():
