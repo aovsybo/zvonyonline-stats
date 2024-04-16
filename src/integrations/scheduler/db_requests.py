@@ -110,7 +110,9 @@ def update_projects_info(projects_info: list[dict]):
     deactivate_irrelevant_projects([project["project_title"] for project in projects_info])
     for project_info in projects_info:
         if ProjectInfo.objects.filter(project_title=project_info["project_title"]).exists():
-            project_instance = ProjectInfo.objects.get(project_title=project_info["project_title"])
+            project_instance = ProjectInfo.objects.get(
+                project_title=project_info["project_title"]
+            )
             serializer = ProjectInfoSerializer(project_instance)
             if serializer.data != project_info:
                 serializer.update(project_instance, project_info)
