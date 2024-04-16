@@ -127,6 +127,5 @@ def get_active_project_titles():
 
 
 def get_projects_info_by_title(project_title: str):
-
     project = ProjectInfo.objects.get(project_title=project_title)
     return ProjectInfoSerializer(project).data
