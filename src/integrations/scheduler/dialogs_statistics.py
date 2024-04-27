@@ -251,4 +251,3 @@ def update_month_dialog_statistics():
     prev_start_date = datetime.timestamp(today - relativedelta(months=1))
     projects_stat = get_projects_stat(start_date, end_date)
     create_or_update_report(projects_stat, start_date, end_date, prev_start_date)
-

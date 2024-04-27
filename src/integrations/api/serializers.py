@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ..models import CallDataInfo, Leads, UsersKPI, ProjectInfo
+from ..models import CallDataInfo, Leads, UsersKPI, ProjectInfo, CRMContact
 
 
 class UsersKPISerializer(serializers.ModelSerializer):
@@ -24,4 +24,10 @@ class LeadsSerializer(serializers.ModelSerializer):
 class ProjectInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectInfo
+        fields = '__all__'
+
+
+class CRMContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CRMContact
         fields = '__all__'

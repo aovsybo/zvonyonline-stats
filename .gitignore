@@ -4,3 +4,4 @@
 credentials.json
 token.json
 WriteDataToGoogleSheet.log
+refresh_token.txt

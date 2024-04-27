@@ -1,6 +1,11 @@
 from django.db import models
 
 
+class CRMContact(models.Model):
+    contact_id = models.IntegerField()
+    phone = models.CharField(max_length=255)
+
+
 class UsersKPI(models.Model):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
