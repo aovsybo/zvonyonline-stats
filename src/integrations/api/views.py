@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 class TestAPI(APIView):
     def post(self, request):
         validated_contact = ContactCreationData.model_validate(flatten_data(request.data))
-        send_lead_to_amocrm(validated_contact)
-        return Response(status=status.HTTP_200_OK)
+        data = send_lead_to_amocrm(validated_contact)
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 class WriteDataToGoogleSheet(CreateAPIView):

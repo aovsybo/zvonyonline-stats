@@ -34,6 +34,12 @@ def auth():
     return save_token_data(data)
 
 
+def get_fields(postfix: str):
+    link = f"/api/v4/{postfix}/custom_fields"
+    url = f"https://{settings.AMO_INTEGRATION_SUBDOMAIN}.amocrm.ru{link}"
+    return requests.get(url).json()
+
+
 def update_access_token(refresh_token: str):
     data = {
         "client_id": settings.AMO_INTEGRATION_CLIENT_ID,
@@ -104,7 +110,7 @@ def create_lead(contact_id, phone: str):
 
 def send_lead_to_amocrm(contact_validated_data):
     contact_id = get_or_create_contact(contact_validated_data)
-    create_lead(contact_id, contact_validated_data.phone)
+    return create_lead(contact_id, contact_validated_data.phone)
 
 
 def is_working_amo_scenario(scenario_id: str):
