@@ -122,5 +122,13 @@ def send_lead_to_amocrm(contact: ContactCreationData, lead: LeadCreationData):
     return create_lead(contact_id, lead, contact.phone)
 
 
-def is_working_amo_scenario(scenario_id: str):
+def is_lead(scenario_id: str, result_id: str):
+    return is_working_scenario_id(scenario_id) and is_working_result_id(result_id)
+
+
+def is_working_result_id(result_id: str):
+    return True if result_id in settings.AMO_WORKING_RESULTS_IDS else False
+
+
+def is_working_scenario_id(scenario_id: str):
     return True if scenario_id in settings.AMO_WORKING_SCENARIOS_IDS else False
