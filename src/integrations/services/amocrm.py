@@ -4,8 +4,13 @@ import time
 
 from django.conf import settings
 
-from .validation import ContactCreationData
+from .validation import ContactCreationData, LeadCreationData
 from . import amo_db
+
+
+LEAD_FIELDS_IDS = {
+    "comment": 1413359
+}
 
 
 def save_token_data(data: dict):
@@ -35,9 +40,12 @@ def auth():
 
 
 def get_fields(postfix: str):
+    headers = {
+        "Authorization": f"Bearer {get_access_token()}",
+    }
     link = f"/api/v4/{postfix}/custom_fields"
     url = f"https://{settings.AMO_INTEGRATION_SUBDOMAIN}.amocrm.ru{link}"
-    return requests.get(url).json()
+    return requests.get(url, headers=headers).json()
 
 
 def update_access_token(refresh_token: str):
@@ -92,7 +100,7 @@ def create_contact(data: ContactCreationData):
     return requests.post(url, json=body, headers=headers).json()['_embedded']['contacts'][0]['id']
 
 
-def create_lead(contact_id, phone: str):
+def create_lead(contact_id, lead: LeadCreationData, phone: str):
     body = [{
         "name": f"Звони онлайн {phone}",
         "pipeline_id": settings.AMO_LEAD_PIPELINE_ID,
@@ -100,6 +108,7 @@ def create_lead(contact_id, phone: str):
         "_embedded": {
             "contacts": [{"id": contact_id}]
         },
+        "custom_fields_values": get_custom_fields_values(LEAD_FIELDS_IDS, lead)
     }]
     headers = {
         "Authorization": f"Bearer {get_access_token()}",
@@ -108,9 +117,9 @@ def create_lead(contact_id, phone: str):
     return requests.post(url, json=body, headers=headers).json()
 
 
-def send_lead_to_amocrm(contact_validated_data):
-    contact_id = get_or_create_contact(contact_validated_data)
-    return create_lead(contact_id, contact_validated_data.phone)
+def send_lead_to_amocrm(contact: ContactCreationData, lead: LeadCreationData):
+    contact_id = get_or_create_contact(contact)
+    return create_lead(contact_id, lead, contact.phone)
 
 
 def is_working_amo_scenario(scenario_id: str):

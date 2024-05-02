@@ -8,6 +8,10 @@ def get_current_date():
     return datetime.now().strftime("%d.%m.%Y %H:%M:%S")
 
 
+class LeadCreationData(BaseModel):
+    comment: str = Field(validation_alias=AliasPath("call_result_comment"), default="")
+
+
 class ContactCreationData(BaseModel):
     phone: str = Field(validation_alias=AliasPath("lead_phones"), default="")
 
