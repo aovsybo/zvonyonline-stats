@@ -27,12 +27,12 @@ class WriteDataToGoogleSheet(CreateAPIView):
         serializer = self.serializer_class(data=flatten_data(request.data))
         if serializer.is_valid():
             serializer.save()
-        if is_lead(serializer.data.get("call_scenario_id", ""), serializer.data.get("call_result_result_id", "")):
-            validated_contact = ContactCreationData.model_validate(serializer.data)
-            validated_lead = LeadCreationData.model_validate(serializer.data)
-            logger.info(f"request data: {request.data}\n"
-                        f"request time: {datetime.now()}\n"
-                        f"validated contact: {validated_contact}\n"
-                        f"validated lead: {validated_lead}\n")
-            send_lead_to_amocrm(validated_contact, validated_lead)
+        # if is_lead(serializer.data.get("call_scenario_id", ""), serializer.data.get("call_result_result_id", "")):
+        #     validated_contact = ContactCreationData.model_validate(serializer.data)
+        #     validated_lead = LeadCreationData.model_validate(serializer.data)
+        #     logger.info(f"request data: {request.data}\n"
+        #                 f"request time: {datetime.now()}\n"
+        #                 f"validated contact: {validated_contact}\n"
+        #                 f"validated lead: {validated_lead}\n")
+        #     send_lead_to_amocrm(validated_contact, validated_lead)
         return Response(status=status.HTTP_201_CREATED)
