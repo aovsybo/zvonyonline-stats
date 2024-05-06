@@ -9,8 +9,20 @@ from . import amo_db
 
 
 LEAD_FIELDS_IDS = {
-    "comment": 1413359
+    1444017: "comment",
 }
+
+CONTACT_FIELDS_IDS = {
+}
+
+AMO_WORKING_SCENARIOS_IDS = [
+    "50000014598",
+    "50000014725",
+]
+AMO_WORKING_RESULTS_IDS = [
+    "50000014598",
+    "50000261928",
+]
 
 
 def save_token_data(data: dict):
@@ -71,7 +83,7 @@ def get_access_token():
 def get_custom_fields_values(field_ids: dict, data):
     custom_fields_values = []
     data = data.dict()
-    for field_name, field_id in field_ids.items():
+    for field_id, field_name in field_ids.items():
         custom_fields_values.append({
             "field_id": field_id,
             "values": [{"value": data[field_name]}]
@@ -88,10 +100,21 @@ def get_or_create_contact(validated_data):
     return contact_id
 
 
-def create_contact(data: ContactCreationData):
+def create_contact(contact: ContactCreationData):
+    custom_fields = get_custom_fields_values(CONTACT_FIELDS_IDS, contact)
+    custom_fields.append({
+      "field_id": 104057,
+      "values": [
+        {
+          "value": contact.phone,
+          "enum_code": "WORK"
+        }
+      ]
+    })
     body = [{
-        "name": data.phone,
-        "PHONES": data.phone,
+        "name": contact.name,
+        "responsible_user_id": 10892178,
+        "custom_fields_values": custom_fields,
     }]
     headers = {
         "Authorization": f"Bearer {get_access_token()}",
@@ -100,15 +123,22 @@ def create_contact(data: ContactCreationData):
     return requests.post(url, json=body, headers=headers).json()['_embedded']['contacts'][0]['id']
 
 
-def create_lead(contact_id, lead: LeadCreationData, phone: str):
+def create_lead(contact_id, lead: LeadCreationData, contact: ContactCreationData):
+    custom_fields = get_custom_fields_values(LEAD_FIELDS_IDS, lead)
+    custom_fields.append({
+        "field_id": 1432107,
+        "values": [{"value": contact.name}]
+    })
     body = [{
-        "name": f"Звони онлайн {phone}",
+        "name": f"Звони онлайн {contact.phone}",
         "pipeline_id": settings.AMO_LEAD_PIPELINE_ID,
         "status_id": settings.AMO_LEAD_STATUS_ID,
+        "Компания": contact.phone,
         "_embedded": {
             "contacts": [{"id": contact_id}]
         },
-        "custom_fields_values": get_custom_fields_values(LEAD_FIELDS_IDS, lead)
+        "responsible_user_id": 10892178,
+        "custom_fields_values": custom_fields
     }]
     headers = {
         "Authorization": f"Bearer {get_access_token()}",
@@ -119,7 +149,7 @@ def create_lead(contact_id, lead: LeadCreationData, phone: str):
 
 def send_lead_to_amocrm(contact: ContactCreationData, lead: LeadCreationData):
     contact_id = get_or_create_contact(contact)
-    return create_lead(contact_id, lead, contact.phone)
+    return create_lead(contact_id, lead, contact)
 
 
 def is_lead(scenario_id: str, result_id: str):
@@ -127,8 +157,8 @@ def is_lead(scenario_id: str, result_id: str):
 
 
 def is_working_result_id(result_id: str):
-    return True if result_id in settings.AMO_WORKING_RESULTS_IDS else False
+    return True if result_id in AMO_WORKING_RESULTS_IDS else False
 
 
 def is_working_scenario_id(scenario_id: str):
-    return True if scenario_id in settings.AMO_WORKING_SCENARIOS_IDS else False
+    return True if scenario_id in AMO_WORKING_SCENARIOS_IDS else False

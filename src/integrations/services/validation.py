@@ -14,6 +14,7 @@ class LeadCreationData(BaseModel):
 
 class ContactCreationData(BaseModel):
     phone: str = Field(validation_alias=AliasPath("lead_phones"), default="")
+    name: str = Field(validation_alias=AliasPath("lead_name"), default="")
 
     @field_validator("phone")
     def phone_validator(cls, value):
